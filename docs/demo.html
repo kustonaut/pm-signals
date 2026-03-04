@@ -3,327 +3,307 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>pm-signals — Interactive Demo</title>
+<title>pm-signals — Signal Inbox</title>
 <style>
   :root {
-    --bg-primary: #0a0e1a;
-    --bg-card: rgba(15, 20, 40, 0.75);
-    --bg-glass: rgba(20, 30, 60, 0.5);
-    --border-glass: rgba(100, 140, 255, 0.15);
-    --accent-blue: #4f8fff;
-    --accent-cyan: #00d4ff;
-    --accent-purple: #a78bfa;
-    --accent-green: #34d399;
-    --accent-orange: #fb923c;
-    --accent-red: #f87171;
-    --accent-yellow: #fbbf24;
-    --text-primary: #e2e8f0;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --radius: 16px;
-    --radius-sm: 10px;
+    --bg-canvas: #0d1117;
+    --bg-surface: #161b22;
+    --bg-overlay: #1c2128;
+    --bg-inset: #010409;
+    --border-default: #30363d;
+    --border-muted: #21262d;
+    --border-subtle: rgba(240,246,252,0.1);
+    --text-primary: #e6edf3;
+    --text-secondary: #7d8590;
+    --text-muted: #484f58;
+    --accent-blue: #58a6ff;
+    --accent-purple: #a371f7;
+    --accent-green: #3fb950;
+    --accent-orange: #d29922;
+    --accent-red: #f85149;
+    --accent-pink: #db61a2;
+    --accent-cyan: #79c0ff;
+    --copilot-gradient: linear-gradient(135deg, #a371f7 0%, #79c0ff 50%, #56d364 100%);
+    --radius: 6px;
+    --radius-lg: 12px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Noto Sans, Helvetica, Arial, sans-serif; background: var(--bg-canvas); color: var(--text-primary); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-  /* Animated background */
-  .bg-orbs {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
-  }
-  .bg-orbs .orb {
-    position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.15;
-    animation: float 20s ease-in-out infinite alternate;
-  }
-  .bg-orbs .orb:nth-child(1) { width: 600px; height: 600px; background: var(--accent-blue); top: -10%; left: -5%; animation-delay: 0s; }
-  .bg-orbs .orb:nth-child(2) { width: 500px; height: 500px; background: var(--accent-purple); top: 40%; right: -10%; animation-delay: -7s; }
-  .bg-orbs .orb:nth-child(3) { width: 400px; height: 400px; background: var(--accent-cyan); bottom: -5%; left: 30%; animation-delay: -14s; }
-  @keyframes float {
-    0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(40px, -30px) scale(1.1); }
-  }
+  /* ── App Shell ── */
+  .app-header { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 48px; background: var(--bg-surface); border-bottom: 1px solid var(--border-default); flex-shrink: 0; z-index: 100; }
+  .app-header .left { display: flex; align-items: center; gap: 12px; }
+  .app-header .logo { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; }
+  .app-header .logo svg { width: 20px; height: 20px; }
+  .app-header .divider { width: 1px; height: 20px; background: var(--border-default); }
+  .app-header .nav-tabs { display: flex; gap: 0; }
+  .app-header .nav-tab { padding: 12px 14px; font-size: 13px; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .app-header .nav-tab:hover { color: var(--text-primary); }
+  .app-header .nav-tab.active { color: var(--text-primary); border-bottom-color: #f78166; }
+  .app-header .nav-tab .count { background: var(--bg-overlay); padding: 0 6px; border-radius: 10px; font-size: 11px; min-width: 18px; text-align: center; color: var(--text-secondary); }
+  .app-header .right { display: flex; align-items: center; gap: 8px; }
 
-  /* Grid pattern overlay */
-  .grid-pattern {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background-image:
-      linear-gradient(rgba(79,143,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(79,143,255,0.03) 1px, transparent 1px);
-    background-size: 60px 60px;
-  }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; font-size: 12px; font-weight: 500; border-radius: var(--radius); cursor: pointer; border: 1px solid var(--border-default); background: var(--bg-overlay); color: var(--text-primary); transition: all 0.15s; font-family: inherit; }
+  .btn:hover { background: var(--bg-surface); border-color: var(--text-muted); }
+  .btn-primary { background: #238636; border-color: rgba(240,246,252,0.1); color: #fff; }
+  .btn-primary:hover { background: #2ea043; }
+  .btn-copilot { background: linear-gradient(135deg, rgba(163,113,247,0.15), rgba(121,192,255,0.15)); border-color: var(--accent-purple); color: var(--accent-purple); }
+  .btn-copilot:hover { background: linear-gradient(135deg, rgba(163,113,247,0.25), rgba(121,192,255,0.25)); }
+  .btn-sm { padding: 3px 8px; font-size: 11px; }
+  .btn-ghost { background: transparent; border: none; color: var(--text-secondary); padding: 4px 8px; }
+  .btn-ghost:hover { color: var(--text-primary); background: var(--bg-overlay); }
 
-  /* Layout */
-  .container { max-width: 1360px; margin: 0 auto; padding: 2rem; position: relative; z-index: 1; }
+  /* ── Main Layout: Inbox | Detail + Copilot ── */
+  .app-body { display: flex; flex: 1; overflow: hidden; }
 
-  /* Header */
-  .hero {
-    text-align: center; padding: 3rem 0 2rem;
-  }
-  .hero h1 {
-    font-size: 3rem; font-weight: 800; letter-spacing: -1px;
-    background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan), var(--accent-purple));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .hero .subtitle {
-    font-size: 1.15rem; color: var(--text-secondary); margin-top: 0.5rem; max-width: 640px; margin-inline: auto;
-  }
-  .hero .badge {
-    display: inline-block; margin-top: 1rem; padding: 0.35rem 1rem;
-    background: rgba(79,143,255,0.12); border: 1px solid rgba(79,143,255,0.25);
-    border-radius: 999px; font-size: 0.8rem; color: var(--accent-blue); font-weight: 600;
-  }
+  /* ── Sidebar (Inbox List) ── */
+  .inbox-sidebar { width: 420px; border-right: 1px solid var(--border-default); display: flex; flex-direction: column; flex-shrink: 0; background: var(--bg-surface); }
+  .inbox-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid var(--border-default); gap: 8px; }
+  .inbox-toolbar .filters { display: flex; gap: 2px; }
+  .filter-chip { padding: 3px 10px; font-size: 11px; border-radius: 20px; cursor: pointer; border: 1px solid transparent; color: var(--text-secondary); background: transparent; transition: all 0.15s; font-family: inherit; font-weight: 500; }
+  .filter-chip:hover { background: var(--bg-overlay); }
+  .filter-chip.active { background: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
+  .filter-chip .count { margin-left: 4px; opacity: 0.7; }
 
-  /* Pipeline visualization */
-  .pipeline-flow {
-    display: flex; align-items: center; justify-content: center; gap: 0.25rem;
-    margin: 2rem 0; flex-wrap: wrap;
-  }
-  .pipeline-step {
-    display: flex; align-items: center; gap: 0.5rem;
-    padding: 0.75rem 1.25rem; border-radius: var(--radius-sm);
-    background: var(--bg-glass); border: 1px solid var(--border-glass);
-    backdrop-filter: blur(12px); font-size: 0.85rem; font-weight: 600;
-    transition: all 0.3s; cursor: default;
-  }
-  .pipeline-step:hover { border-color: var(--accent-blue); transform: translateY(-2px); }
-  .pipeline-step.active { border-color: var(--accent-cyan); box-shadow: 0 0 20px rgba(0,212,255,0.15); }
-  .pipeline-arrow { color: var(--text-muted); font-size: 1.2rem; }
+  .inbox-search { display: flex; align-items: center; padding: 6px 12px; border-bottom: 1px solid var(--border-default); }
+  .inbox-search input { flex: 1; background: transparent; border: none; color: var(--text-primary); font-size: 13px; outline: none; font-family: inherit; }
+  .inbox-search input::placeholder { color: var(--text-muted); }
+  .inbox-search svg { width: 16px; height: 16px; color: var(--text-muted); margin-right: 8px; flex-shrink: 0; }
 
-  /* Glass cards */
-  .glass-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-glass);
-    border-radius: var(--radius);
-    backdrop-filter: blur(16px);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-  .glass-card h2 {
-    font-size: 1.2rem; margin-bottom: 1rem;
-    display: flex; align-items: center; gap: 0.5rem;
-  }
+  .inbox-list { flex: 1; overflow-y: auto; }
+  .inbox-list::-webkit-scrollbar { width: 6px; }
+  .inbox-list::-webkit-scrollbar-track { background: transparent; }
+  .inbox-list::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
 
-  /* Two-column layout */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+  .inbox-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border-muted); cursor: pointer; transition: background 0.1s; position: relative; }
+  .inbox-item:hover { background: var(--bg-overlay); }
+  .inbox-item.selected { background: rgba(88,166,255,0.08); border-left: 2px solid var(--accent-blue); padding-left: 12px; }
+  .inbox-item.unread .inbox-title { font-weight: 600; color: var(--text-primary); }
+  .inbox-item .urgency-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+  .inbox-item .urgency-dot.critical { background: var(--accent-red); box-shadow: 0 0 6px rgba(248,81,73,0.5); }
+  .inbox-item .urgency-dot.high { background: var(--accent-orange); }
+  .inbox-item .urgency-dot.medium { background: #d29922; }
+  .inbox-item .urgency-dot.low { background: var(--border-default); }
+  .inbox-content { flex: 1; min-width: 0; }
+  .inbox-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+  .inbox-title { font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+  .inbox-time { font-size: 11px; color: var(--text-muted); flex-shrink: 0; margin-left: 8px; }
+  .inbox-preview { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+  .inbox-tags { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+  .tag { font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 500; border: 1px solid; }
+  .tag-source { color: var(--accent-cyan); border-color: rgba(121,192,255,0.3); background: rgba(121,192,255,0.08); }
+  .tag-project { color: var(--accent-purple); border-color: rgba(163,113,247,0.3); background: rgba(163,113,247,0.08); }
 
-  /* Signal input area */
-  .signal-input {
-    width: 100%; min-height: 100px; padding: 1rem;
-    background: rgba(15,20,40,0.6); border: 1px solid var(--border-glass);
-    border-radius: var(--radius-sm); color: var(--text-primary);
-    font-family: inherit; font-size: 0.9rem; resize: vertical;
-    outline: none; transition: border-color 0.3s;
-  }
-  .signal-input:focus { border-color: var(--accent-blue); }
-  .signal-input::placeholder { color: var(--text-muted); }
+  /* ── Detail Panel (middle) ── */
+  .detail-panel { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .detail-header { padding: 14px 20px; border-bottom: 1px solid var(--border-default); background: var(--bg-surface); }
+  .detail-header h2 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .detail-header .detail-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap; }
+  .detail-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+  .detail-body::-webkit-scrollbar { width: 6px; }
+  .detail-body::-webkit-scrollbar-track { background: transparent; }
+  .detail-body::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
 
-  .btn {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    padding: 0.6rem 1.2rem; border: none; border-radius: var(--radius-sm);
-    font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
-  }
-  .btn-primary {
-    background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
-    color: #fff;
-  }
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(79,143,255,0.3); }
-  .btn-secondary {
-    background: var(--bg-glass); color: var(--text-primary);
-    border: 1px solid var(--border-glass);
-  }
-  .btn-secondary:hover { border-color: var(--accent-blue); }
+  /* Signal content area */
+  .signal-content { padding: 20px; flex-shrink: 0; }
+  .signal-body { font-size: 14px; line-height: 1.7; color: var(--text-secondary); }
+  .signal-body p { margin-bottom: 12px; }
 
-  .btn-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+  /* Copilot analysis strip */
+  .copilot-strip { border-top: 1px solid var(--border-default); background: rgba(163,113,247,0.03); flex: 1; display: flex; flex-direction: column; }
+  .copilot-header { display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-bottom: 1px solid var(--border-muted); }
+  .copilot-avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--copilot-gradient); display: flex; align-items: center; justify-content: center; font-size: 12px; }
+  .copilot-header .name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .copilot-header .badge { font-size: 10px; padding: 1px 6px; border-radius: 10px; background: rgba(163,113,247,0.15); color: var(--accent-purple); font-weight: 500; }
+  .copilot-messages { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .copilot-messages::-webkit-scrollbar { width: 6px; }
+  .copilot-messages::-webkit-scrollbar-track { background: transparent; }
+  .copilot-messages::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
 
-  /* Signal feed */
-  .signal-feed { max-height: 500px; overflow-y: auto; }
-  .signal-feed::-webkit-scrollbar { width: 6px; }
-  .signal-feed::-webkit-scrollbar-track { background: transparent; }
-  .signal-feed::-webkit-scrollbar-thumb { background: rgba(100,140,255,0.2); border-radius: 3px; }
+  .copilot-msg { font-size: 13px; line-height: 1.6; color: var(--text-secondary); animation: fadeUp 0.3s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-  .signal-card {
-    padding: 0.8rem 1rem; border-radius: var(--radius-sm);
-    background: rgba(20,30,60,0.4); border: 1px solid rgba(100,140,255,0.08);
-    margin-bottom: 0.5rem; transition: all 0.3s;
-    animation: slideIn 0.3s ease;
-  }
-  .signal-card:hover { border-color: rgba(100,140,255,0.2); transform: translateX(3px); }
-  @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+  .copilot-msg .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+  .analysis-card { padding: 10px 12px; border-radius: var(--radius); border: 1px solid var(--border-muted); background: var(--bg-overlay); }
+  .analysis-card .card-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 4px; }
+  .analysis-card .card-value { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .analysis-card .card-detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
-  .signal-card .header {
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;
-  }
-  .signal-card .title { font-weight: 600; font-size: 0.85rem; }
-  .signal-card .source {
-    font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 999px;
-    background: rgba(79,143,255,0.12); color: var(--accent-blue);
-  }
-  .signal-card .body { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4; }
-  .signal-card .meta { display: flex; gap: 0.5rem; margin-top: 0.4rem; flex-wrap: wrap; }
+  .copilot-msg .action-suggestion { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: var(--radius); background: rgba(163,113,247,0.1); border: 1px solid rgba(163,113,247,0.2); color: var(--accent-purple); font-size: 12px; font-weight: 500; margin-top: 4px; }
 
-  /* Badges */
-  .badge-sm {
-    font-size: 0.65rem; padding: 0.12rem 0.45rem; border-radius: 999px; font-weight: 600;
-  }
-  .badge-critical { background: rgba(248,113,113,0.15); color: var(--accent-red); }
-  .badge-high { background: rgba(251,146,60,0.15); color: var(--accent-orange); }
-  .badge-medium { background: rgba(251,191,36,0.15); color: var(--accent-yellow); }
-  .badge-low { background: rgba(52,211,153,0.15); color: var(--accent-green); }
-  .badge-frustrated { background: rgba(248,113,113,0.15); color: var(--accent-red); }
-  .badge-negative { background: rgba(251,146,60,0.15); color: var(--accent-orange); }
-  .badge-neutral { background: rgba(148,163,184,0.15); color: var(--text-secondary); }
-  .badge-constructive { background: rgba(167,139,250,0.15); color: var(--accent-purple); }
-  .badge-positive { background: rgba(52,211,153,0.15); color: var(--accent-green); }
-  .badge-project {
-    background: rgba(79,143,255,0.1); color: var(--accent-blue); border: 1px solid rgba(79,143,255,0.2);
-  }
+  /* Typing indicator */
+  .typing-indicator { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+  .typing-dots { display: flex; gap: 4px; }
+  .typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-purple); opacity: 0.4; animation: typingDot 1.4s infinite; }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingDot { 0%,60%,100% { opacity: 0.4; transform: scale(1); } 30% { opacity: 1; transform: scale(1.2); } }
 
-  /* Stats grid */
-  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; }
-  .stat-card {
-    text-align: center; padding: 1rem; border-radius: var(--radius-sm);
-    background: rgba(20,30,60,0.4); border: 1px solid rgba(100,140,255,0.08);
-  }
-  .stat-card .value { font-size: 2rem; font-weight: 800; }
-  .stat-card .label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
-  .stat-card.critical .value { color: var(--accent-red); }
-  .stat-card.high .value { color: var(--accent-orange); }
-  .stat-card.medium .value { color: var(--accent-yellow); }
-  .stat-card.low .value { color: var(--accent-green); }
+  /* ── Brief Panel (collapsible right) ── */
+  .brief-panel { width: 360px; border-left: 1px solid var(--border-default); background: var(--bg-surface); display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.2s; overflow: hidden; }
+  .brief-panel.collapsed { width: 0; border: none; }
+  .brief-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--border-default); }
+  .brief-header h3 { font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .brief-content { flex: 1; overflow-y: auto; padding: 14px; font-size: 12px; line-height: 1.7; color: var(--text-secondary); white-space: pre-wrap; }
+  .brief-content::-webkit-scrollbar { width: 6px; }
+  .brief-content::-webkit-scrollbar-track { background: transparent; }
+  .brief-content::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+  .brief-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--border-default); }
+  .brief-stat { text-align: center; padding: 8px 4px; border-radius: var(--radius); background: var(--bg-overlay); }
+  .brief-stat .val { font-size: 18px; font-weight: 700; }
+  .brief-stat .lbl { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+  .brief-stat.s-critical .val { color: var(--accent-red); }
+  .brief-stat.s-high .val { color: var(--accent-orange); }
+  .brief-stat.s-med .val { color: var(--accent-orange); }
+  .brief-stat.s-total .val { color: var(--accent-blue); }
 
-  /* Brief output */
-  .brief-output {
-    background: rgba(15,20,40,0.6); border: 1px solid var(--border-glass);
-    border-radius: var(--radius-sm); padding: 1.25rem;
-    font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap;
-    max-height: 500px; overflow-y: auto; color: var(--text-secondary);
-  }
-  .brief-output h1, .brief-output h2, .brief-output h3 { color: var(--text-primary); margin: 0.5rem 0; }
-  .brief-output strong { color: var(--text-primary); }
+  /* ── Empty states ── */
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 12px; color: var(--text-muted); padding: 40px; text-align: center; }
+  .empty-state svg { width: 48px; height: 48px; opacity: 0.3; }
+  .empty-state h3 { font-size: 16px; color: var(--text-secondary); font-weight: 600; }
+  .empty-state p { font-size: 13px; max-width: 320px; }
 
-  /* Chart area */
-  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; }
-  @media (max-width: 900px) { .chart-row { grid-template-columns: 1fr; } }
-  .chart-container { height: 300px; position: relative; }
-  canvas { width: 100% !important; height: 100% !important; }
+  /* ── Compose bar ── */
+  .compose-bar { padding: 10px 14px; border-top: 1px solid var(--border-default); background: var(--bg-surface); display: flex; gap: 8px; }
+  .compose-bar textarea { flex: 1; background: var(--bg-inset); border: 1px solid var(--border-default); border-radius: var(--radius); color: var(--text-primary); padding: 8px 12px; font-size: 13px; font-family: inherit; resize: none; outline: none; min-height: 36px; max-height: 100px; transition: border-color 0.15s; }
+  .compose-bar textarea:focus { border-color: var(--accent-blue); }
+  .compose-bar textarea::placeholder { color: var(--text-muted); }
 
-  /* Footer */
-  .footer {
-    text-align: center; padding: 2rem 0; color: var(--text-muted); font-size: 0.8rem;
-  }
-  .footer a { color: var(--accent-blue); text-decoration: none; }
-  .footer a:hover { text-decoration: underline; }
+  /* ── Responsive ── */
+  @media (max-width: 1100px) { .brief-panel { display: none; } }
+  @media (max-width: 768px) { .inbox-sidebar { width: 100%; } .detail-panel { display: none; } }
 
-  /* Pulse animation for live indicator */
-  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
-  .live-dot {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--accent-green);
-    display: inline-block; animation: pulse 2s infinite;
-  }
+  /* Urgency/sentiment colors */
+  .uc-critical { color: var(--accent-red); }
+  .uc-high { color: var(--accent-orange); }
+  .uc-medium { color: #d29922; }
+  .uc-low { color: var(--accent-green); }
+  .sc-frustrated { color: var(--accent-red); }
+  .sc-negative { color: var(--accent-orange); }
+  .sc-neutral { color: var(--text-secondary); }
+  .sc-constructive { color: var(--accent-purple); }
+  .sc-positive { color: var(--accent-green); }
+
+  /* Bar chart in brief panel */
+  .mini-bar-row { display: flex; align-items: center; gap: 6px; margin: 3px 0; }
+  .mini-bar-label { font-size: 11px; color: var(--text-secondary); width: 85px; text-align: right; flex-shrink: 0; }
+  .mini-bar-track { flex: 1; height: 14px; background: var(--bg-overlay); border-radius: 3px; overflow: hidden; }
+  .mini-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 4px; font-size: 9px; font-weight: 600; color: #fff; min-width: 18px; }
 </style>
 </head>
 <body>
-<div class="bg-orbs">
-  <div class="orb"></div>
-  <div class="orb"></div>
-  <div class="orb"></div>
-</div>
-<div class="grid-pattern"></div>
 
-<div class="container">
-  <!-- Hero -->
-  <div class="hero">
-    <h1>pm-signals</h1>
-    <p class="subtitle">Multi-source signal intelligence for product managers. Fetch, classify, and synthesize signals from GitHub, RSS, files, and more — all in one pipeline.</p>
-    <span class="badge">v0.1.0 · Open Source · Zero Config Demo</span>
-  </div>
-
-  <!-- Pipeline Flow -->
-  <div class="pipeline-flow">
-    <div class="pipeline-step" id="step-fetch">📡 Fetch</div>
-    <span class="pipeline-arrow">→</span>
-    <div class="pipeline-step" id="step-route">🗂️ Route</div>
-    <span class="pipeline-arrow">→</span>
-    <div class="pipeline-step" id="step-sentiment">💬 Sentiment</div>
-    <span class="pipeline-arrow">→</span>
-    <div class="pipeline-step" id="step-urgency">🚨 Urgency</div>
-    <span class="pipeline-arrow">→</span>
-    <div class="pipeline-step" id="step-brief">📋 Brief</div>
-  </div>
-
-  <!-- Stats Dashboard -->
-  <div class="stats-grid" id="stats-grid">
-    <div class="stat-card"><div class="value" id="stat-total">0</div><div class="label">Signals</div></div>
-    <div class="stat-card critical"><div class="value" id="stat-critical">0</div><div class="label">Critical</div></div>
-    <div class="stat-card high"><div class="value" id="stat-high">0</div><div class="label">High</div></div>
-    <div class="stat-card medium"><div class="value" id="stat-medium">0</div><div class="label">Medium</div></div>
-    <div class="stat-card low"><div class="value" id="stat-low">0</div><div class="label">Low</div></div>
-    <div class="stat-card"><div class="value" id="stat-projects">0</div><div class="label">Projects</div></div>
-  </div>
-
-  <!-- Main content -->
-  <div class="two-col" style="margin-top:1.5rem;">
-    <!-- Left: Input + Signal Feed -->
-    <div>
-      <div class="glass-card">
-        <h2>🧪 Try It — Add a Signal</h2>
-        <textarea class="signal-input" id="signal-input" placeholder="Type or paste a signal...\n\nExamples:\n• Production API returning 500 errors — critical performance regression\n• Feature request: add dark mode to the dashboard\n• Great work on the new search feature! Users love it."></textarea>
-        <div class="btn-row">
-          <button class="btn btn-primary" onclick="addCustomSignal()">⚡ Analyze</button>
-          <button class="btn btn-secondary" onclick="loadSampleSignals()">📦 Load 20 Samples</button>
-          <button class="btn btn-secondary" onclick="clearAll()">🗑️ Clear</button>
-        </div>
+<!-- ═══ App Header ═══ -->
+<header class="app-header">
+  <div class="left">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      <span>pm-signals</span>
+    </div>
+    <div class="divider"></div>
+    <div class="nav-tabs">
+      <div class="nav-tab active" id="tab-inbox">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M2.5 2A1.5 1.5 0 0 0 1 3.5v9A1.5 1.5 0 0 0 2.5 14h11a1.5 1.5 0 0 0 1.5-1.5V6.621a1.5 1.5 0 0 0-.44-1.06l-3.12-3.12A1.5 1.5 0 0 0 10.38 2H2.5zM2 3.5a.5.5 0 0 1 .5-.5h7v2.5A1.5 1.5 0 0 0 11 7h2v5.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5V6h3.5a.5.5 0 0 0 0-1H2V3.5z"/></svg>
+        Inbox <span class="count" id="tab-count">0</span>
       </div>
+    </div>
+  </div>
+  <div class="right">
+    <button class="btn btn-copilot btn-sm" onclick="loadSampleSignals()">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0zm4-2a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 0 1.5h-3.5A.75.75 0 0 1 5.5 6zM5 9.75A.75.75 0 0 1 5.75 9h4.5a.75.75 0 0 1 0 1.5h-4.5A.75.75 0 0 1 5 9.75z"/></svg>
+      Load 20 Samples
+    </button>
+    <button class="btn btn-sm" onclick="clearAll()">Clear</button>
+    <button class="btn btn-sm btn-ghost" onclick="toggleBrief()" id="brief-toggle" title="Toggle brief panel">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M0 1.75A.75.75 0 0 1 .75 1h14.5a.75.75 0 0 1 0 1.5H.75A.75.75 0 0 1 0 1.75zm0 6A.75.75 0 0 1 .75 7h14.5a.75.75 0 0 1 0 1.5H.75A.75.75 0 0 1 0 7.75zm.75 5.25a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5H.75z"/></svg>
+    </button>
+  </div>
+</header>
 
-      <div class="glass-card">
-        <h2><span class="live-dot"></span> Signal Feed</h2>
-        <div class="signal-feed" id="signal-feed">
-          <div style="text-align:center;padding:2rem;color:var(--text-muted);">
-            Add a signal above or load sample data to start.
+<!-- ═══ App Body ═══ -->
+<div class="app-body">
+
+  <!-- ── Inbox Sidebar ── -->
+  <div class="inbox-sidebar">
+    <div class="inbox-toolbar">
+      <div class="filters">
+        <button class="filter-chip active" data-filter="all" onclick="setFilter('all',this)">All</button>
+        <button class="filter-chip" data-filter="critical" onclick="setFilter('critical',this)">Critical</button>
+        <button class="filter-chip" data-filter="high" onclick="setFilter('high',this)">High</button>
+        <button class="filter-chip" data-filter="medium" onclick="setFilter('medium',this)">Medium</button>
+        <button class="filter-chip" data-filter="low" onclick="setFilter('low',this)">Low</button>
+      </div>
+    </div>
+    <div class="inbox-search">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11.5 7a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0zm-.82 4.74a6 6 0 1 1 1.06-1.06l3.04 3.04a.75.75 0 1 1-1.06 1.06l-3.04-3.04z"/></svg>
+      <input type="text" placeholder="Filter signals..." id="search-input" oninput="renderInbox()">
+    </div>
+    <div class="inbox-list" id="inbox-list">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+        <h3>No signals yet</h3>
+        <p>Click <strong>Load 20 Samples</strong> or type a signal below to get started.</p>
+      </div>
+    </div>
+    <div class="compose-bar">
+      <textarea id="signal-input" placeholder="Paste a signal... (Ctrl+Enter to send)" rows="1"></textarea>
+      <button class="btn btn-primary btn-sm" onclick="addCustomSignal()">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M.989 8 .064 2.68a1.342 1.342 0 0 1 1.85-1.462l13.402 5.744a1.13 1.13 0 0 1 0 2.076L1.913 14.782a1.343 1.343 0 0 1-1.85-1.463L.99 8zm.603-4.884L2.2 7.25h4.55a.75.75 0 0 1 0 1.5H2.2L1.592 12.884 14.1 8 1.592 3.116z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Detail + Copilot Panel ── -->
+  <div class="detail-panel" id="detail-panel">
+    <div class="empty-state" id="detail-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/></svg>
+      <h3>Select a signal</h3>
+      <p>Choose a signal from your inbox to see Copilot's analysis — routing, sentiment, urgency, and suggested actions.</p>
+    </div>
+
+    <div id="detail-view" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+      <div class="detail-header" id="detail-header"></div>
+      <div class="detail-body">
+        <div class="signal-content" id="signal-content"></div>
+        <div class="copilot-strip">
+          <div class="copilot-header">
+            <div class="copilot-avatar">✦</div>
+            <span class="name">Copilot</span>
+            <span class="badge">Analysis</span>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right: Triage Results + Brief -->
-    <div>
-      <div class="glass-card">
-        <h2>📋 Generated Brief</h2>
-        <div class="brief-output" id="brief-output">
-          Run the pipeline to generate an intelligence brief.
+          <div class="copilot-messages" id="copilot-messages"></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Charts -->
-  <div class="chart-row">
-    <div class="glass-card">
-      <h2>📊 Urgency Distribution</h2>
-      <div class="chart-container"><canvas id="urgency-chart"></canvas></div>
+  <!-- ── Brief Panel (right sidebar) ── -->
+  <div class="brief-panel" id="brief-panel">
+    <div class="brief-header">
+      <h3>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M0 1.75A.75.75 0 01.75 1h4.253c1.227 0 2.317.59 3 1.501A3.744 3.744 0 0111.006 1h4.245a.75.75 0 01.75.75v10.5a.75.75 0 01-.75.75h-4.507a2.25 2.25 0 00-1.591.659l-.622.621a.75.75 0 01-1.06 0l-.623-.621A2.25 2.25 0 005.258 13H.75a.75.75 0 01-.75-.75V1.75zm7.251 10.324l.004-5.073-.002-2.253A2.25 2.25 0 005.003 2.5H1.5v9h3.757a3.75 3.75 0 011.994.574zM8.755 4.75l-.004 7.322a3.752 3.752 0 011.992-.572H14.5v-9h-3.495a2.25 2.25 0 00-2.25 2.25z"/></svg>
+        Daily Brief
+      </h3>
+      <button class="btn-ghost btn-sm" onclick="toggleBrief()">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"/></svg>
+      </button>
     </div>
-    <div class="glass-card">
-      <h2>📊 Project Breakdown</h2>
-      <div class="chart-container"><canvas id="project-chart"></canvas></div>
+    <div class="brief-stats" id="brief-stats">
+      <div class="brief-stat s-total"><div class="val" id="bs-total">0</div><div class="lbl">SIGNALS</div></div>
+      <div class="brief-stat s-critical"><div class="val" id="bs-critical">0</div><div class="lbl">CRITICAL</div></div>
+      <div class="brief-stat s-high"><div class="val" id="bs-high">0</div><div class="lbl">HIGH</div></div>
+    </div>
+    <div class="brief-content" id="brief-content">
+      <div style="text-align:center;color:var(--text-muted);padding:40px 20px;">
+        Load signals to generate a brief.
+      </div>
     </div>
   </div>
 
-  <div class="footer">
-    <p>Built by <a href="https://github.com/kustonaut" target="_blank">@kustonaut</a> · <a href="https://github.com/kustonaut/pm-signals" target="_blank">GitHub</a> · MIT License</p>
-    <p style="margin-top:0.5rem;">Part of the <a href="https://github.com/kustonaut" target="_blank">PM Intelligence</a> open-source toolkit</p>
-  </div>
 </div>
 
-<!-- Minimal chart library (no external deps) -->
 <script>
-// ─── Signal Engine (runs entirely in browser) ────────────────────────
+// ─── Signal Engine ────────────────────────────────────────────────
 
 const PROJECT_KEYWORDS = {
   'Frontend': ['react','vue','angular','css','ui','component','dashboard','page','render','dom','layout','responsive','mobile','accessibility','a11y','button','modal','form'],
@@ -334,69 +314,42 @@ const PROJECT_KEYWORDS = {
 
 const SENTIMENT_PATTERNS = {
   frustrated: [
-    [/\b(frustrated|frustrating)\b/i, 0.8],
-    [/\b(broken|still broken|keeps breaking)\b/i, 0.7],
-    [/\b(unacceptable|ridiculous)\b/i, 0.9],
-    [/\b(wast(?:e|ed|ing) time)\b/i, 0.7],
-    [/\b(no response|ignored|no update)\b/i, 0.6],
-    [/\b(terrible|horrible|awful)\b/i, 0.8],
-    [/!!+/, 0.5],
+    [/\b(frustrated|frustrating)\b/i, 0.8], [/\b(broken|still broken|keeps breaking)\b/i, 0.7],
+    [/\b(unacceptable|ridiculous)\b/i, 0.9], [/\b(wast(?:e|ed|ing) time)\b/i, 0.7],
+    [/\b(no response|ignored|no update)\b/i, 0.6], [/\b(terrible|horrible|awful)\b/i, 0.8], [/!!+/, 0.5],
   ],
   negative: [
-    [/\b(bug|issue|problem|fail(?:ed)?|error)\b/i, 0.3],
-    [/\b(slow|poor|bad|wrong)\b/i, 0.4],
-    [/\b(cannot|can't|doesn't work|not working)\b/i, 0.5],
-    [/\b(crash(?:es|ed|ing)?)\b/i, 0.5],
-    [/\b(timeout|timed? out)\b/i, 0.4],
+    [/\b(bug|issue|problem|fail(?:ed)?|error)\b/i, 0.3], [/\b(slow|poor|bad|wrong)\b/i, 0.4],
+    [/\b(cannot|can't|doesn't work|not working)\b/i, 0.5], [/\b(crash(?:es|ed|ing)?)\b/i, 0.5], [/\b(timeout|timed? out)\b/i, 0.4],
   ],
   positive: [
-    [/\b(thanks|thank you|great|awesome)\b/i, 0.4],
-    [/\b(works|working|resolved|fixed)\b/i, 0.3],
-    [/\b(love|excellent|perfect)\b/i, 0.5],
-    [/\b(helpful|useful|appreciate)\b/i, 0.4],
-    [/\b(well done|nice work|good job)\b/i, 0.5],
+    [/\b(thanks|thank you|great|awesome)\b/i, 0.4], [/\b(works|working|resolved|fixed)\b/i, 0.3],
+    [/\b(love|excellent|perfect)\b/i, 0.5], [/\b(helpful|useful|appreciate)\b/i, 0.4], [/\b(well done|nice work|good job)\b/i, 0.5],
   ],
   constructive: [
-    [/\b(suggest(?:ion)?|proposal|idea)\b/i, 0.4],
-    [/\b(would be nice|feature request|enhancement)\b/i, 0.3],
-    [/\b(workaround|alternative)\b/i, 0.3],
-    [/\b(could we|what if|how about)\b/i, 0.3],
-    [/\b(improvement|improve)\b/i, 0.3],
+    [/\b(suggest(?:ion)?|proposal|idea)\b/i, 0.4], [/\b(would be nice|feature request|enhancement)\b/i, 0.3],
+    [/\b(workaround|alternative)\b/i, 0.3], [/\b(could we|what if|how about)\b/i, 0.3], [/\b(improvement|improve)\b/i, 0.3],
   ],
 };
 
 const URGENCY_PATTERNS = {
   critical: [
-    [/\b(security|vulnerability|CVE-\d+)\b/i, 1.0],
-    [/\b(data loss|data corruption)\b/i, 0.95],
-    [/\b(production down|service down)\b/i, 0.9],
-    [/\b(outage|site down)\b/i, 0.85],
-    [/\b(P0|Sev[- ]?0|Sev[- ]?1)\b/i, 0.9],
-    [/\b(incident|emergency)\b/i, 0.8],
+    [/\b(security|vulnerability|CVE-\d+)\b/i, 1.0], [/\b(data loss|data corruption)\b/i, 0.95],
+    [/\b(production down|service down)\b/i, 0.9], [/\b(outage|site down)\b/i, 0.85],
+    [/\b(P0|Sev[- ]?0|Sev[- ]?1)\b/i, 0.9], [/\b(incident|emergency)\b/i, 0.8],
   ],
   high: [
-    [/\b(P1|Sev[- ]?2)\b/i, 0.7],
-    [/\b(escalation|escalated)\b/i, 0.65],
-    [/\b(urgent|urgently)\b/i, 0.7],
-    [/\b(regression|regressed)\b/i, 0.65],
-    [/\b(blocking|blocker)\b/i, 0.6],
-    [/\b(ASAP|immediately)\b/i, 0.65],
-    [/\b(customer[- ]impact)\b/i, 0.7],
-    [/\b(OOM|out of memory)\b/i, 0.6],
+    [/\b(P1|Sev[- ]?2)\b/i, 0.7], [/\b(escalation|escalated)\b/i, 0.65], [/\b(urgent|urgently)\b/i, 0.7],
+    [/\b(regression|regressed)\b/i, 0.65], [/\b(blocking|blocker)\b/i, 0.6], [/\b(ASAP|immediately)\b/i, 0.65],
+    [/\b(customer[- ]impact)\b/i, 0.7], [/\b(OOM|out of memory)\b/i, 0.6],
   ],
   medium: [
-    [/\b(P2|Sev[- ]?3)\b/i, 0.4],
-    [/\b(bug|defect)\b/i, 0.3],
-    [/\b(performance|slow|latency)\b/i, 0.35],
-    [/\b(feature request|enhancement)\b/i, 0.25],
-    [/\b(compliance|audit)\b/i, 0.4],
+    [/\b(P2|Sev[- ]?3)\b/i, 0.4], [/\b(bug|defect)\b/i, 0.3], [/\b(performance|slow|latency)\b/i, 0.35],
+    [/\b(feature request|enhancement)\b/i, 0.25], [/\b(compliance|audit)\b/i, 0.4],
   ],
   low: [
-    [/\b(P3|Sev[- ]?4)\b/i, 0.15],
-    [/\b(question|documentation)\b/i, 0.1],
-    [/\b(minor|cosmetic|typo)\b/i, 0.1],
-    [/\b(nice to have|low priority)\b/i, 0.1],
-    [/\b(suggestion|idea)\b/i, 0.1],
+    [/\b(P3|Sev[- ]?4)\b/i, 0.15], [/\b(question|documentation)\b/i, 0.1], [/\b(minor|cosmetic|typo)\b/i, 0.1],
+    [/\b(nice to have|low priority)\b/i, 0.1], [/\b(suggestion|idea)\b/i, 0.1],
   ],
 };
 
@@ -426,8 +379,10 @@ const SAMPLE_SIGNALS = [
 let signals = [];
 let triageResults = [];
 let signalCounter = 0;
+let selectedIndex = -1;
+let currentFilter = 'all';
 
-// ─── Triage Engine ──────────────────────────────────────────────────
+// ─── Triage Engine ──────────────────────────────────────────────
 
 function routeSignal(text) {
   let best = { project: 'unclassified', confidence: 0, keywords: [] };
@@ -445,18 +400,10 @@ function routeSignal(text) {
 
 function analyzeSentiment(text) {
   let score = 0;
-  for (const [pattern, weight] of SENTIMENT_PATTERNS.frustrated) {
-    if (pattern.test(text)) score -= weight;
-  }
-  for (const [pattern, weight] of SENTIMENT_PATTERNS.negative) {
-    if (pattern.test(text)) score -= weight;
-  }
-  for (const [pattern, weight] of SENTIMENT_PATTERNS.positive) {
-    if (pattern.test(text)) score += weight;
-  }
-  for (const [pattern, weight] of SENTIMENT_PATTERNS.constructive) {
-    if (pattern.test(text)) score += weight * 0.5;
-  }
+  for (const [p, w] of SENTIMENT_PATTERNS.frustrated) { if (p.test(text)) score -= w; }
+  for (const [p, w] of SENTIMENT_PATTERNS.negative) { if (p.test(text)) score -= w; }
+  for (const [p, w] of SENTIMENT_PATTERNS.positive) { if (p.test(text)) score += w; }
+  for (const [p, w] of SENTIMENT_PATTERNS.constructive) { if (p.test(text)) score += w * 0.5; }
   score = Math.max(-1, Math.min(1, score));
   let label;
   if (score <= -0.6) label = 'frustrated';
@@ -468,20 +415,11 @@ function analyzeSentiment(text) {
 }
 
 function scoreUrgency(text) {
-  let maxScore = 0;
-  let matched = [];
-  for (const [pattern, weight] of URGENCY_PATTERNS.critical) {
-    if (pattern.test(text)) { maxScore = Math.max(maxScore, weight); matched.push('critical'); }
-  }
-  for (const [pattern, weight] of URGENCY_PATTERNS.high) {
-    if (pattern.test(text)) { maxScore = Math.max(maxScore, weight); matched.push('high'); }
-  }
-  for (const [pattern, weight] of URGENCY_PATTERNS.medium) {
-    if (pattern.test(text)) { maxScore = Math.max(maxScore, 0.3 + weight * 0.3); matched.push('medium'); }
-  }
-  for (const [pattern, weight] of URGENCY_PATTERNS.low) {
-    if (pattern.test(text)) { if (maxScore === 0) maxScore = weight; matched.push('low'); }
-  }
+  let maxScore = 0, matched = [];
+  for (const [p, w] of URGENCY_PATTERNS.critical) { if (p.test(text)) { maxScore = Math.max(maxScore, w); matched.push('critical'); } }
+  for (const [p, w] of URGENCY_PATTERNS.high) { if (p.test(text)) { maxScore = Math.max(maxScore, w); matched.push('high'); } }
+  for (const [p, w] of URGENCY_PATTERNS.medium) { if (p.test(text)) { maxScore = Math.max(maxScore, 0.3 + w * 0.3); matched.push('medium'); } }
+  for (const [p, w] of URGENCY_PATTERNS.low) { if (p.test(text)) { if (maxScore === 0) maxScore = w; matched.push('low'); } }
   let level;
   if (maxScore >= 0.8) level = 'critical';
   else if (maxScore >= 0.55) level = 'high';
@@ -490,276 +428,285 @@ function scoreUrgency(text) {
   return { level, score: Math.round(maxScore * 1000) / 1000, matched };
 }
 
+function classifyAction(text, urgency) {
+  const patterns = {
+    investigate: [/\b(incident|outage|failed|error|crash|timeout)\b/i],
+    respond: [/\b(question|ask|how to|help|guidance)\b/i],
+    fix: [/\b(bug|regression|broken|patch|hotfix)\b/i],
+    track: [/\b(tracking|monitoring|watch|known issue)\b/i],
+  };
+  if (urgency === 'critical') return 'investigate';
+  for (const [action, pats] of Object.entries(patterns)) {
+    if (pats.some(p => p.test(text))) return action;
+  }
+  return 'track';
+}
+
 function triageSignal(sig) {
   const text = `${sig.title} ${sig.body}`;
   const route = routeSignal(text);
   const sentiment = analyzeSentiment(text);
   const urgency = scoreUrgency(text);
-  return { id: sig.id, ...route, sentiment: sentiment.label, sentimentScore: sentiment.score, urgency: urgency.level, urgencyScore: urgency.score };
+  const action = classifyAction(text, urgency.level);
+  return { id: sig.id, ...route, sentiment: sentiment.label, sentimentScore: sentiment.score, urgency: urgency.level, urgencyScore: urgency.score, action };
 }
 
-// ─── UI Rendering ───────────────────────────────────────────────────
+// ─── UI ─────────────────────────────────────────────────────────
 
 function addCustomSignal() {
   const input = document.getElementById('signal-input');
   const text = input.value.trim();
   if (!text) return;
-
-  // Parse: first line = title, rest = body
   const lines = text.split('\n');
   const title = lines[0];
   const body = lines.slice(1).join('\n').trim() || title;
-
   const sig = { id: `custom-${++signalCounter}`, source: 'custom', title, body, author: 'you', timestamp: new Date().toISOString() };
-  signals.push(sig);
-  triageResults.push(triageSignal(sig));
-
+  signals.unshift(sig);
+  triageResults.unshift(triageSignal(sig));
   input.value = '';
+  input.style.height = '36px';
+  selectedIndex = 0;
   renderAll();
-  animatePipeline();
 }
 
 function loadSampleSignals() {
+  const authors = ['dev-sarah','pm-alex','ops-taylor','data-jamie','dev-marco','dev-priya','dev-chen'];
   SAMPLE_SIGNALS.forEach(s => {
-    const sig = { id: `sample-${++signalCounter}`, ...s, author: ['dev-sarah','pm-alex','ops-taylor','data-jamie','dev-marco','dev-priya','dev-chen'][Math.floor(Math.random()*7)], timestamp: new Date(Date.now() - Math.random()*86400000).toISOString() };
+    const sig = { id: `sample-${++signalCounter}`, ...s, author: authors[Math.floor(Math.random()*7)], timestamp: new Date(Date.now() - Math.random()*86400000).toISOString() };
     signals.push(sig);
     triageResults.push(triageSignal(sig));
   });
+  if (selectedIndex < 0) selectedIndex = 0;
   renderAll();
-  animatePipeline();
 }
 
 function clearAll() {
-  signals = [];
-  triageResults = [];
-  signalCounter = 0;
+  signals = []; triageResults = []; signalCounter = 0; selectedIndex = -1;
   renderAll();
 }
 
-function animatePipeline() {
-  const steps = ['step-fetch','step-route','step-sentiment','step-urgency','step-brief'];
-  steps.forEach((id, i) => {
-    setTimeout(() => {
-      document.getElementById(id).classList.add('active');
-      setTimeout(() => document.getElementById(id).classList.remove('active'), 600);
-    }, i * 300);
-  });
+function setFilter(filter, el) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderInbox();
+}
+
+function toggleBrief() {
+  document.getElementById('brief-panel').classList.toggle('collapsed');
+}
+
+function getFilteredIndices() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const indices = [];
+  for (let i = 0; i < signals.length; i++) {
+    const r = triageResults[i];
+    if (currentFilter !== 'all' && r.urgency !== currentFilter) continue;
+    if (search && !signals[i].title.toLowerCase().includes(search) && !signals[i].body.toLowerCase().includes(search)) continue;
+    indices.push(i);
+  }
+  return indices;
+}
+
+function selectSignal(idx) {
+  selectedIndex = idx;
+  renderInbox();
+  renderDetail();
 }
 
 function renderAll() {
-  renderFeed();
-  renderStats();
+  renderInbox();
+  renderDetail();
   renderBrief();
-  renderCharts();
+  document.getElementById('tab-count').textContent = signals.length;
 }
 
-function renderFeed() {
-  const feed = document.getElementById('signal-feed');
+function renderInbox() {
+  const list = document.getElementById('inbox-list');
+  const indices = getFilteredIndices();
+
   if (signals.length === 0) {
-    feed.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Add a signal above or load sample data to start.</div>';
+    list.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg><h3>No signals yet</h3><p>Click <strong>Load 20 Samples</strong> or type a signal below to get started.</p></div>`;
     return;
   }
 
-  feed.innerHTML = signals.slice().reverse().map((sig, idx) => {
-    const result = triageResults[signals.length - 1 - idx];
-    const urgencyEmoji = { critical: '🔴', high: '🟠', medium: '🟡', low: '🟢' }[result?.urgency] || '⚪';
+  if (indices.length === 0) {
+    list.innerHTML = `<div class="empty-state"><h3>No matches</h3><p>Try a different filter or search term.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = indices.map(i => {
+    const sig = signals[i];
+    const r = triageResults[i];
+    const ts = new Date(sig.timestamp);
+    const timeStr = ts.getHours().toString().padStart(2,'0') + ':' + ts.getMinutes().toString().padStart(2,'0');
+    const isSelected = i === selectedIndex;
     return `
-      <div class="signal-card">
-        <div class="header">
-          <span class="title">${urgencyEmoji} ${escapeHtml(sig.title)}</span>
-          <span class="source">${sig.source}</span>
+      <div class="inbox-item ${isSelected ? 'selected' : ''} unread" onclick="selectSignal(${i})">
+        <div class="urgency-dot ${r.urgency}"></div>
+        <div class="inbox-content">
+          <div class="inbox-top">
+            <span class="inbox-title">${escapeHtml(sig.title)}</span>
+            <span class="inbox-time">${timeStr}</span>
+          </div>
+          <div class="inbox-preview">${escapeHtml(sig.body.substring(0, 80))}${sig.body.length > 80 ? '...' : ''}</div>
+          <div class="inbox-tags">
+            <span class="tag tag-source">${sig.source}</span>
+            <span class="tag tag-project">${r.project}</span>
+          </div>
         </div>
-        <div class="body">${escapeHtml((sig.body || '').substring(0, 120))}${sig.body?.length > 120 ? '...' : ''}</div>
-        <div class="meta">
-          ${result ? `
-            <span class="badge-sm badge-${result.urgency}">${result.urgency}</span>
-            <span class="badge-sm badge-${result.sentiment}">${result.sentiment}</span>
-            <span class="badge-sm badge-project">${result.project}</span>
-          ` : ''}
-        </div>
-      </div>
-    `;
+      </div>`;
   }).join('');
 }
 
-function renderStats() {
-  document.getElementById('stat-total').textContent = signals.length;
-  const urgencyCounts = { critical: 0, high: 0, medium: 0, low: 0 };
-  const projectSet = new Set();
-  triageResults.forEach(r => {
-    urgencyCounts[r.urgency] = (urgencyCounts[r.urgency] || 0) + 1;
-    projectSet.add(r.project);
-  });
-  document.getElementById('stat-critical').textContent = urgencyCounts.critical;
-  document.getElementById('stat-high').textContent = urgencyCounts.high;
-  document.getElementById('stat-medium').textContent = urgencyCounts.medium;
-  document.getElementById('stat-low').textContent = urgencyCounts.low;
-  document.getElementById('stat-projects').textContent = projectSet.size;
-}
+function renderDetail() {
+  const empty = document.getElementById('detail-empty');
+  const view = document.getElementById('detail-view');
 
-function renderBrief() {
-  const output = document.getElementById('brief-output');
-  if (signals.length === 0) {
-    output.textContent = 'Run the pipeline to generate an intelligence brief.';
+  if (selectedIndex < 0 || selectedIndex >= signals.length) {
+    empty.style.display = 'flex';
+    view.style.display = 'none';
     return;
   }
 
-  const today = new Date().toISOString().split('T')[0];
-  const urgencyCounts = { critical: 0, high: 0, medium: 0, low: 0 };
-  const projectSignals = {};
-  const sentimentCounts = {};
+  empty.style.display = 'none';
+  view.style.display = 'flex';
 
-  triageResults.forEach((r, i) => {
-    urgencyCounts[r.urgency] = (urgencyCounts[r.urgency] || 0) + 1;
-    sentimentCounts[r.sentiment] = (sentimentCounts[r.sentiment] || 0) + 1;
-    if (!projectSignals[r.project]) projectSignals[r.project] = [];
-    projectSignals[r.project].push({ ...r, title: signals[i].title, source: signals[i].source });
-  });
+  const sig = signals[selectedIndex];
+  const r = triageResults[selectedIndex];
+  const ts = new Date(sig.timestamp);
 
-  const urgencyOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+  // Header
+  const hdr = document.getElementById('detail-header');
+  hdr.innerHTML = `
+    <h2>${escapeHtml(sig.title)}</h2>
+    <div class="detail-meta">
+      <span class="tag tag-source">${sig.source}</span>
+      <span>from <strong>${sig.author || 'unknown'}</strong></span>
+      <span>·</span>
+      <span>${ts.toLocaleString()}</span>
+    </div>`;
+
+  // Body
+  document.getElementById('signal-content').innerHTML = `<div class="signal-body"><p>${escapeHtml(sig.body)}</p></div>`;
+
+  // Copilot analysis with simulated typing
+  renderCopilotAnalysis(sig, r);
+}
+
+function renderCopilotAnalysis(sig, r) {
+  const container = document.getElementById('copilot-messages');
+  container.innerHTML = `
+    <div class="typing-indicator">
+      <div class="copilot-avatar" style="width:20px;height:20px;font-size:10px;">✦</div>
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+    </div>`;
+
   const urgencyEmoji = { critical: '🔴', high: '🟠', medium: '🟡', low: '🟢' };
+  const sentimentEmoji = { frustrated: '😤', negative: '😟', neutral: '😐', constructive: '💡', positive: '😊' };
+  const actionLabels = { investigate: '🔍 Investigate immediately', respond: '💬 Respond to author', fix: '🔧 Schedule fix', track: '📌 Track & monitor', route: '↗️ Route to team' };
 
-  let md = `# 📋 Daily Intelligence Brief — ${today}\n\n`;
-  md += `**${signals.length} signals** from ${new Set(signals.map(s=>s.source)).size} sources. `;
-  if (urgencyCounts.critical > 0) md += `🔴 **${urgencyCounts.critical} critical.** `;
-  if (urgencyCounts.high > 0) md += `🟠 **${urgencyCounts.high} high.** `;
-  if (sentimentCounts.frustrated) md += `⚠️ ${sentimentCounts.frustrated} frustrated signals. `;
-  md += '\n\n---\n\n';
+  setTimeout(() => {
+    container.innerHTML = `
+      <div class="copilot-msg">
+        I analyzed this signal across <strong>3 dimensions</strong>. Here's my assessment:
+        <div class="analysis-grid">
+          <div class="analysis-card">
+            <div class="card-label">Project</div>
+            <div class="card-value"><span class="uc-${r.urgency}" style="color:var(--accent-purple)">📂</span> ${r.project}</div>
+            <div class="card-detail">Confidence: ${Math.round(r.confidence * 100)}% · ${r.keywords.length} keyword${r.keywords.length !== 1 ? 's' : ''} matched</div>
+          </div>
+          <div class="analysis-card">
+            <div class="card-label">Urgency</div>
+            <div class="card-value"><span>${urgencyEmoji[r.urgency]}</span> <span class="uc-${r.urgency}">${r.urgency.charAt(0).toUpperCase() + r.urgency.slice(1)}</span></div>
+            <div class="card-detail">Score: ${r.urgencyScore}</div>
+          </div>
+          <div class="analysis-card">
+            <div class="card-label">Sentiment</div>
+            <div class="card-value"><span>${sentimentEmoji[r.sentiment]}</span> <span class="sc-${r.sentiment}">${r.sentiment.charAt(0).toUpperCase() + r.sentiment.slice(1)}</span></div>
+            <div class="card-detail">Score: ${r.sentimentScore}</div>
+          </div>
+          <div class="analysis-card">
+            <div class="card-label">Matched Keywords</div>
+            <div class="card-value" style="font-size:12px;flex-wrap:wrap;gap:4px;">${r.keywords.length > 0 ? r.keywords.slice(0, 5).map(k => `<code style="background:var(--bg-inset);padding:1px 5px;border-radius:3px;font-size:11px;">${k}</code>`).join('') : '<span style="color:var(--text-muted)">none</span>'}</div>
+          </div>
+        </div>
+      </div>
+      <div class="copilot-msg">
+        <strong>Suggested action:</strong>
+        <div class="action-suggestion">${actionLabels[r.action] || '📌 Track'}</div>
+        ${r.urgency === 'critical' ? '<div style="margin-top:8px;padding:8px 12px;border-radius:var(--radius);background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.2);font-size:12px;color:var(--accent-red);">⚠️ This signal has <strong>critical urgency</strong> — it should be triaged within the hour.</div>' : ''}
+        ${r.sentiment === 'frustrated' ? '<div style="margin-top:8px;padding:8px 12px;border-radius:var(--radius);background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.2);font-size:12px;color:var(--accent-red);">😤 The author sounds <strong>frustrated</strong> — consider a direct response to acknowledge the issue.</div>' : ''}
+      </div>`;
+    container.scrollTop = container.scrollHeight;
+  }, 600);
+}
 
-  const sortedProjects = Object.keys(projectSignals).sort((a,b) => {
-    const aMax = Math.min(...projectSignals[a].map(s => urgencyOrder[s.urgency] ?? 4));
-    const bMax = Math.min(...projectSignals[b].map(s => urgencyOrder[s.urgency] ?? 4));
-    return aMax - bMax;
-  });
+function renderBrief() {
+  const totalEl = document.getElementById('bs-total');
+  const critEl = document.getElementById('bs-critical');
+  const highEl = document.getElementById('bs-high');
+  const content = document.getElementById('brief-content');
 
-  for (const project of sortedProjects) {
-    const items = projectSignals[project].sort((a,b) => (urgencyOrder[a.urgency]??4) - (urgencyOrder[b.urgency]??4));
-    md += `## ${project} (${items.length})\n\n`;
-    items.forEach(item => {
-      md += `${urgencyEmoji[item.urgency]||'⚪'} **${item.title}** — ${item.sentiment} · ${item.urgency} · [${item.source}]\n`;
-    });
-    md += '\n';
+  if (signals.length === 0) {
+    totalEl.textContent = '0'; critEl.textContent = '0'; highEl.textContent = '0';
+    content.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:40px 20px;">Load signals to generate a brief.</div>';
+    return;
   }
 
-  md += `---\n\n*Generated by pm-signals v0.1.0*`;
-  output.textContent = md;
-}
-
-function renderCharts() {
-  renderUrgencyChart();
-  renderProjectChart();
-}
-
-function renderUrgencyChart() {
-  const canvas = document.getElementById('urgency-chart');
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = canvas.offsetWidth * dpr;
-  canvas.height = canvas.offsetHeight * dpr;
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
-
-  const counts = { critical: 0, high: 0, medium: 0, low: 0 };
-  triageResults.forEach(r => counts[r.urgency] = (counts[r.urgency]||0)+1);
-  const data = Object.entries(counts);
-  const total = data.reduce((s,[,v])=>s+v, 0);
-  if (total === 0) { drawEmptyChart(ctx, canvas); return; }
-
-  const colors = { critical: '#f87171', high: '#fb923c', medium: '#fbbf24', low: '#34d399' };
-  const cx = canvas.offsetWidth / 2, cy = canvas.offsetHeight / 2;
-  const radius = Math.min(cx, cy) - 40;
-  let startAngle = -Math.PI / 2;
-
-  data.forEach(([label, value]) => {
-    if (value === 0) return;
-    const sliceAngle = (value / total) * Math.PI * 2;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, radius, startAngle, startAngle + sliceAngle);
-    ctx.closePath();
-    ctx.fillStyle = colors[label];
-    ctx.fill();
-
-    // Label
-    const midAngle = startAngle + sliceAngle / 2;
-    const lx = cx + (radius * 0.65) * Math.cos(midAngle);
-    const ly = cy + (radius * 0.65) * Math.sin(midAngle);
-    ctx.fillStyle = '#0a0e1a';
-    ctx.font = 'bold 13px Segoe UI';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(`${label} (${value})`, lx, ly);
-
-    startAngle += sliceAngle;
+  const uc = { critical: 0, high: 0, medium: 0, low: 0 };
+  const pc = {};
+  const sc = {};
+  triageResults.forEach((r, i) => {
+    uc[r.urgency] = (uc[r.urgency]||0) + 1;
+    pc[r.project] = (pc[r.project]||0) + 1;
+    sc[r.sentiment] = (sc[r.sentiment]||0) + 1;
   });
 
-  // Center hole for donut
-  ctx.beginPath();
-  ctx.arc(cx, cy, radius * 0.45, 0, Math.PI * 2);
-  ctx.fillStyle = '#0a0e1a';
-  ctx.fill();
-  ctx.fillStyle = '#e2e8f0';
-  ctx.font = 'bold 22px Segoe UI';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(total, cx, cy - 8);
-  ctx.font = '11px Segoe UI';
-  ctx.fillStyle = '#94a3b8';
-  ctx.fillText('signals', cx, cy + 12);
-}
+  totalEl.textContent = signals.length;
+  critEl.textContent = uc.critical;
+  highEl.textContent = uc.high;
 
-function renderProjectChart() {
-  const canvas = document.getElementById('project-chart');
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = canvas.offsetWidth * dpr;
-  canvas.height = canvas.offsetHeight * dpr;
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+  const today = new Date().toISOString().split('T')[0];
+  const sources = [...new Set(signals.map(s => s.source))];
 
-  const counts = {};
-  triageResults.forEach(r => counts[r.project] = (counts[r.project]||0)+1);
-  const data = Object.entries(counts).sort((a,b) => b[1] - a[1]);
-  if (data.length === 0) { drawEmptyChart(ctx, canvas); return; }
+  let html = `<div style="margin-bottom:14px;">`;
+  html += `<div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:6px;">📋 Brief — ${today}</div>`;
+  html += `<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;">`;
+  html += `<strong>${signals.length}</strong> signals from ${sources.length} source${sources.length > 1 ? 's' : ''}. `;
+  if (uc.critical > 0) html += `<span class="uc-critical">🔴 ${uc.critical} critical.</span> `;
+  if (uc.high > 0) html += `<span class="uc-high">🟠 ${uc.high} high.</span> `;
+  if (sc.frustrated) html += `<span class="sc-frustrated">😤 ${sc.frustrated} frustrated.</span> `;
+  html += `</div></div>`;
 
-  const barColors = ['#4f8fff','#a78bfa','#00d4ff','#34d399','#fb923c','#f87171','#fbbf24'];
-  const padding = { top: 20, right: 30, bottom: 40, left: 120 };
-  const w = canvas.offsetWidth - padding.left - padding.right;
-  const h = canvas.offsetHeight - padding.top - padding.bottom;
-  const barHeight = Math.min(35, h / data.length - 8);
-  const max = Math.max(...data.map(d => d[1]));
+  // Urgency bars
+  html += `<div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin:12px 0 6px;">Urgency</div>`;
+  const urgencyColors = { critical: 'var(--accent-red)', high: 'var(--accent-orange)', medium: '#d29922', low: 'var(--accent-green)' };
+  const maxUc = Math.max(...Object.values(uc), 1);
+  for (const [level, count] of Object.entries(uc)) {
+    html += `<div class="mini-bar-row"><span class="mini-bar-label">${level}</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${(count/maxUc)*100}%;background:${urgencyColors[level]}">${count}</div></div></div>`;
+  }
 
-  data.forEach(([label, value], i) => {
-    const y = padding.top + i * (barHeight + 8);
-    const barW = (value / max) * w;
-    const color = barColors[i % barColors.length];
-
-    // Bar
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.roundRect(padding.left, y, barW, barHeight, 6);
-    ctx.fill();
-
-    // Label
-    ctx.fillStyle = '#e2e8f0';
-    ctx.font = '12px Segoe UI';
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(label, padding.left - 10, y + barHeight / 2);
-
-    // Value
-    ctx.fillStyle = '#94a3b8';
-    ctx.textAlign = 'left';
-    ctx.fillText(value, padding.left + barW + 8, y + barHeight / 2);
+  // Project bars
+  html += `<div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin:14px 0 6px;">Projects</div>`;
+  const projColors = ['var(--accent-purple)','var(--accent-blue)','var(--accent-cyan)','var(--accent-green)','var(--accent-orange)'];
+  const sortedProjects = Object.entries(pc).sort((a,b) => b[1] - a[1]);
+  const maxPc = Math.max(...sortedProjects.map(p => p[1]), 1);
+  sortedProjects.forEach(([proj, count], i) => {
+    html += `<div class="mini-bar-row"><span class="mini-bar-label">${proj}</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${(count/maxPc)*100}%;background:${projColors[i % projColors.length]}">${count}</div></div></div>`;
   });
-}
 
-function drawEmptyChart(ctx, canvas) {
-  ctx.fillStyle = '#64748b';
-  ctx.font = '14px Segoe UI';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('No data yet — add signals to visualize', canvas.offsetWidth / 2, canvas.offsetHeight / 2);
+  // Top items by urgency
+  html += `<div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin:14px 0 8px;">Top Signals</div>`;
+  const urgencyOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+  const urgencyEmoji = { critical: '🔴', high: '🟠', medium: '🟡', low: '🟢' };
+  const sorted = triageResults.map((r, i) => ({ ...r, title: signals[i].title, idx: i })).sort((a,b) => (urgencyOrder[a.urgency]??4) - (urgencyOrder[b.urgency]??4));
+  sorted.slice(0, 8).forEach(item => {
+    html += `<div style="font-size:12px;padding:4px 0;cursor:pointer;color:var(--text-secondary);" onclick="selectSignal(${item.idx})">${urgencyEmoji[item.urgency]} ${escapeHtml(item.title.substring(0, 42))}${item.title.length > 42 ? '...' : ''}</div>`;
+  });
+
+  html += `<div style="margin-top:16px;font-size:10px;color:var(--text-muted);text-align:center;">Generated by pm-signals v0.1.0</div>`;
+  content.innerHTML = html;
 }
 
 function escapeHtml(text) {
@@ -768,14 +715,28 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// Handle enter key in textarea
-document.getElementById('signal-input').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-    addCustomSignal();
+// ─── Auto-grow textarea ─────────────────────────────────────────
+const ta = document.getElementById('signal-input');
+ta.addEventListener('input', () => { ta.style.height = '36px'; ta.style.height = Math.min(ta.scrollHeight, 100) + 'px'; });
+ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); addCustomSignal(); } });
+
+// ─── Keyboard navigation ────────────────────────────────────────
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+  const indices = getFilteredIndices();
+  if (indices.length === 0) return;
+  const curPos = indices.indexOf(selectedIndex);
+  if (e.key === 'ArrowDown' || e.key === 'j') {
+    e.preventDefault();
+    const next = curPos < indices.length - 1 ? indices[curPos + 1] : indices[0];
+    selectSignal(next);
+  } else if (e.key === 'ArrowUp' || e.key === 'k') {
+    e.preventDefault();
+    const prev = curPos > 0 ? indices[curPos - 1] : indices[indices.length - 1];
+    selectSignal(prev);
   }
 });
 
-// Initial render
 renderAll();
 </script>
 </body>
