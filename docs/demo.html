@@ -189,6 +189,61 @@
   .mini-bar-label { font-size: 11px; color: var(--text-secondary); width: 85px; text-align: right; flex-shrink: 0; }
   .mini-bar-track { flex: 1; height: 14px; background: var(--bg-overlay); border-radius: 3px; overflow: hidden; }
   .mini-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 4px; font-size: 9px; font-weight: 600; color: #fff; min-width: 18px; }
+
+  /* ── Sources Panel ── */
+  .sources-panel { display: none; flex: 1; flex-direction: column; overflow-y: auto; padding: 24px; gap: 20px; }
+  .app-body.sources-active .inbox-sidebar { display: none; }
+  .app-body.sources-active .detail-panel { display: none; }
+  .app-body.sources-active .sources-panel { display: flex; }
+  .sources-header { margin-bottom: 4px; }
+  .sources-header h2 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .sources-header p { font-size: 13px; color: var(--text-secondary); }
+  .sources-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+  .source-card { background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; gap: 12px; transition: border-color 0.2s; }
+  .source-card:hover { border-color: var(--text-muted); }
+  .source-card.connected { border-color: var(--accent-green); }
+  .source-card-header { display: flex; align-items: center; justify-content: space-between; }
+  .source-card-title { display: flex; align-items: center; gap: 10px; }
+  .source-icon { width: 36px; height: 36px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .source-icon.gh { background: rgba(88,166,255,0.12); color: var(--accent-blue); }
+  .source-icon.rss { background: rgba(210,153,34,0.12); color: var(--accent-orange); }
+  .source-icon.file { background: rgba(163,113,247,0.12); color: var(--accent-purple); }
+  .source-icon.gmail { background: rgba(234,67,53,0.12); color: #ea4335; }
+  .source-icon.slack { background: rgba(63,185,80,0.12); color: var(--accent-green); }
+  .source-icon.cal { background: rgba(88,166,255,0.12); color: var(--accent-cyan); }
+  select.source-input { -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%237d8590' viewBox='0 0 16 16'%3E%3Cpath d='M4.427 7.427l3.396 3.396a.25.25 0 00.354 0l3.396-3.396A.25.25 0 0011.396 7H4.604a.25.25 0 00-.177.427z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
+  select.source-input option { background: var(--bg-surface); color: var(--text-primary); }
+  .source-card-title h3 { font-size: 14px; font-weight: 600; }
+  .source-desc { font-size: 12px; color: var(--text-secondary); }
+  .source-status { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 500; }
+  .source-status.disconnected { color: var(--text-muted); background: var(--bg-overlay); }
+  .source-status.connected { color: var(--accent-green); background: rgba(63,185,80,0.1); }
+  .source-status.fetching { color: var(--accent-blue); background: rgba(88,166,255,0.1); animation: pulse 1.5s infinite; }
+  .source-status.error { color: var(--accent-red); background: rgba(248,81,73,0.1); }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .source-form { display: flex; flex-direction: column; gap: 8px; }
+  .source-form label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+  .source-input { background: var(--bg-inset); border: 1px solid var(--border-default); border-radius: var(--radius); color: var(--text-primary); padding: 8px 12px; font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.15s; width: 100%; }
+  .source-input:focus { border-color: var(--accent-blue); }
+  .source-input::placeholder { color: var(--text-muted); }
+  .source-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+  .preset-chip { padding: 4px 10px; font-size: 11px; border-radius: 20px; cursor: pointer; border: 1px solid var(--border-default); color: var(--text-secondary); background: var(--bg-overlay); transition: all 0.15s; font-family: inherit; }
+  .preset-chip:hover { border-color: var(--accent-blue); color: var(--text-primary); background: rgba(88,166,255,0.08); }
+  .source-actions { display: flex; gap: 8px; margin-top: 4px; }
+  .source-signal-count { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .drop-zone { border: 2px dashed var(--border-default); border-radius: var(--radius-lg); padding: 24px; text-align: center; color: var(--text-muted); font-size: 13px; transition: all 0.2s; cursor: pointer; }
+  .drop-zone:hover { border-color: var(--accent-purple); color: var(--text-secondary); }
+  .drop-zone.drag-over { border-color: var(--accent-purple); background: rgba(163,113,247,0.05); color: var(--accent-purple); }
+  .drop-zone .drop-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+  .source-log { max-height: 120px; overflow-y: auto; margin-top: 8px; padding: 8px; background: var(--bg-inset); border-radius: var(--radius); font-size: 11px; font-family: 'SF Mono', Monaco, Consolas, monospace; color: var(--text-muted); line-height: 1.5; }
+  .source-log::-webkit-scrollbar { width: 4px; }
+  .source-log::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 2px; }
+  .log-entry { padding: 1px 0; }
+  .log-entry.success { color: var(--accent-green); }
+  .log-entry.error { color: var(--accent-red); }
+  .log-entry.info { color: var(--accent-blue); }
+  .source-note { font-size: 11px; color: var(--text-muted); padding: 8px 12px; background: var(--bg-overlay); border-radius: var(--radius); border-left: 3px solid var(--accent-blue); line-height: 1.5; }
+  textarea.source-input { resize: vertical; }
 </style>
 </head>
 <body>
@@ -202,9 +257,13 @@
     </div>
     <div class="divider"></div>
     <div class="nav-tabs">
-      <div class="nav-tab active" id="tab-inbox">
+      <div class="nav-tab active" id="tab-inbox" onclick="switchTab('inbox')">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M2.5 2A1.5 1.5 0 0 0 1 3.5v9A1.5 1.5 0 0 0 2.5 14h11a1.5 1.5 0 0 0 1.5-1.5V6.621a1.5 1.5 0 0 0-.44-1.06l-3.12-3.12A1.5 1.5 0 0 0 10.38 2H2.5zM2 3.5a.5.5 0 0 1 .5-.5h7v2.5A1.5 1.5 0 0 0 11 7h2v5.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5V6h3.5a.5.5 0 0 0 0-1H2V3.5z"/></svg>
         Inbox <span class="count" id="tab-count">0</span>
+      </div>
+      <div class="nav-tab" id="tab-sources" onclick="switchTab('sources')">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354zM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0z"/></svg>
+        Sources <span class="count" id="source-count">0</span>
       </div>
     </div>
   </div>
@@ -250,6 +309,159 @@
       <button class="btn btn-primary btn-sm" onclick="addCustomSignal()">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M.989 8 .064 2.68a1.342 1.342 0 0 1 1.85-1.462l13.402 5.744a1.13 1.13 0 0 1 0 2.076L1.913 14.782a1.343 1.343 0 0 1-1.85-1.463L.99 8zm.603-4.884L2.2 7.25h4.55a.75.75 0 0 1 0 1.5H2.2L1.592 12.884 14.1 8 1.592 3.116z"/></svg>
       </button>
+    </div>
+  </div>
+
+  <!-- ── Sources Panel (shown when Sources tab is active) ── -->
+  <div class="sources-panel" id="sources-panel">
+    <div class="sources-header">
+      <h2>Connect Sources</h2>
+      <p>Add signal sources to your inbox. GitHub fetches <strong>real live data</strong> via public API. Gmail, Slack, and Calendar use realistic mock data. Files &amp; text are processed locally in your browser.</p>
+    </div>
+    <div class="sources-grid">
+      <!-- GitHub Card -->
+      <div class="source-card" id="source-github">
+        <div class="source-card-header">
+          <div class="source-card-title">
+            <div class="source-icon gh"><svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></div>
+            <div><h3>GitHub Issues</h3><div class="source-desc">Fetch real issues from any public repository</div></div>
+          </div>
+          <span class="source-status disconnected" id="gh-status">&#9679; Disconnected</span>
+        </div>
+        <div class="source-form">
+          <label>Repository (owner/repo)</label>
+          <div style="display:flex;gap:8px;"><input class="source-input" id="gh-repo-input" placeholder="e.g. facebook/react" style="flex:1;"><button class="btn btn-primary btn-sm" onclick="connectGitHub()" id="gh-connect-btn">Connect</button></div>
+          <div class="source-presets">
+            <button class="preset-chip" onclick="setGHPreset('facebook/react')">facebook/react</button>
+            <button class="preset-chip" onclick="setGHPreset('vercel/next.js')">vercel/next.js</button>
+            <button class="preset-chip" onclick="setGHPreset('denoland/deno')">denoland/deno</button>
+            <button class="preset-chip" onclick="setGHPreset('sveltejs/svelte')">sveltejs/svelte</button>
+          </div>
+        </div>
+        <div class="source-signal-count" id="gh-signal-count"></div>
+        <div class="source-log" id="gh-log" style="display:none;"></div>
+      </div>
+      <!-- RSS Card -->
+      <div class="source-card" id="source-rss">
+        <div class="source-card-header">
+          <div class="source-card-title">
+            <div class="source-icon rss"><svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M2.002 2.725a.75.75 0 01.797-.699C8.79 2.42 13.58 7.21 13.974 13.201a.75.75 0 11-1.497.098C12.145 8.138 7.862 3.855 2.801 3.523a.75.75 0 01-.7-.798zm.392 4.927a.75.75 0 01.824-.669c3.333.399 5.998 3.064 6.397 6.397a.75.75 0 01-1.489.18 7.006 7.006 0 00-5.063-5.063.75.75 0 01-.67-.845zM2.5 13.5a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z"/></svg></div>
+            <div><h3>RSS Feeds</h3><div class="source-desc">Subscribe to tech blogs and news feeds</div></div>
+          </div>
+          <span class="source-status disconnected" id="rss-status">&#9679; Disconnected</span>
+        </div>
+        <div class="source-form">
+          <label>Feed name or URL</label>
+          <div style="display:flex;gap:8px;"><input class="source-input" id="rss-url-input" placeholder="e.g. Hacker News"><button class="btn btn-primary btn-sm" onclick="connectRSS()" id="rss-connect-btn">Connect</button></div>
+          <div class="source-presets">
+            <button class="preset-chip" onclick="setRSSPreset('Hacker News')">Hacker News</button>
+            <button class="preset-chip" onclick="setRSSPreset('TechCrunch')">TechCrunch</button>
+            <button class="preset-chip" onclick="setRSSPreset('Dev.to')">Dev.to</button>
+            <button class="preset-chip" onclick="setRSSPreset('GitHub Blog')">GitHub Blog</button>
+          </div>
+          <div class="source-note">&#8505;&#65039; Browser CORS restrictions prevent direct RSS fetches. Presets load realistic mock data to demonstrate the triage pipeline.</div>
+        </div>
+        <div class="source-signal-count" id="rss-signal-count"></div>
+        <div class="source-log" id="rss-log" style="display:none;"></div>
+      </div>
+      <!-- File/Text Card -->
+      <div class="source-card" id="source-file">
+        <div class="source-card-header">
+          <div class="source-card-title">
+            <div class="source-icon file"><svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M3.75 1.5a.25.25 0 00-.25.25v11.5c0 .138.112.25.25.25h8.5a.25.25 0 00.25-.25V6H9.75A1.75 1.75 0 018 4.25V1.5H3.75zm5.75.56v2.19c0 .138.112.25.25.25h2.19L9.5 2.06zM2 1.75C2 .784 2.784 0 3.75 0h5.086c.464 0 .909.184 1.237.513l3.414 3.414c.329.328.513.773.513 1.237v8.086A1.75 1.75 0 0112.25 15h-8.5A1.75 1.75 0 012 13.25V1.75z"/></svg></div>
+            <div><h3>Files &amp; Text</h3><div class="source-desc">Drop files or paste raw signal text</div></div>
+          </div>
+          <span class="source-status disconnected" id="file-status">&#9679; Ready</span>
+        </div>
+        <div class="drop-zone" id="drop-zone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" onclick="document.getElementById('file-input').click()">
+          <span class="drop-icon">&#128196;</span>
+          <div>Drop .txt, .md, .json files here</div>
+          <div style="font-size:11px;margin-top:4px;">or click to browse</div>
+        </div>
+        <input type="file" id="file-input" accept=".txt,.md,.json,.csv" multiple style="display:none;" onchange="handleFileInput(event)">
+        <div class="source-form" style="margin-top:4px;">
+          <label>Or paste text directly</label>
+          <textarea class="source-input" id="text-paste" placeholder="Paste signal text here... Each paragraph becomes a separate signal." rows="3"></textarea>
+          <button class="btn btn-sm" onclick="processTextPaste()" style="align-self:flex-start;">Process Text</button>
+        </div>
+        <div class="source-signal-count" id="file-signal-count"></div>
+        <div class="source-log" id="file-log" style="display:none;"></div>
+      </div>
+      <!-- Gmail Card -->
+      <div class="source-card" id="source-gmail">
+        <div class="source-card-header">
+          <div class="source-card-title">
+            <div class="source-icon gmail">&#9993;</div>
+            <div><h3>Gmail / Email</h3><div class="source-desc">Import email signals from your inbox</div></div>
+          </div>
+          <span class="source-status disconnected" id="gmail-status">&#9679; Disconnected</span>
+        </div>
+        <div class="source-form">
+          <label>Category</label>
+          <div style="display:flex;gap:8px;">
+            <select class="source-input" id="gmail-category" style="flex:1;"><option>Work Inbox</option><option>Alerts</option><option>Newsletters</option></select>
+            <button class="btn btn-primary btn-sm" onclick="connectGmail()">Connect</button>
+          </div>
+          <div class="source-presets">
+            <button class="preset-chip" onclick="setGmailPreset('Work Inbox')">&#128229; Work Inbox</button>
+            <button class="preset-chip" onclick="setGmailPreset('Alerts')">&#128680; Alerts</button>
+            <button class="preset-chip" onclick="setGmailPreset('Newsletters')">&#128240; Newsletters</button>
+          </div>
+          <div class="source-note">&#128274; Mock data &mdash; in production, connects via OAuth 2.0 (Gmail API or Microsoft Graph).</div>
+        </div>
+        <div class="source-signal-count" id="gmail-signal-count"></div>
+        <div class="source-log" id="gmail-log" style="display:none;"></div>
+      </div>
+      <!-- Slack Card -->
+      <div class="source-card" id="source-slack">
+        <div class="source-card-header">
+          <div class="source-card-title">
+            <div class="source-icon slack">&#128172;</div>
+            <div><h3>Slack</h3><div class="source-desc">Pull messages from channels and threads</div></div>
+          </div>
+          <span class="source-status disconnected" id="slack-status">&#9679; Disconnected</span>
+        </div>
+        <div class="source-form">
+          <label>Channel</label>
+          <div style="display:flex;gap:8px;">
+            <select class="source-input" id="slack-channel" style="flex:1;"><option>#engineering</option><option>#incidents</option><option>#product</option><option>#general</option></select>
+            <button class="btn btn-primary btn-sm" onclick="connectSlack()">Connect</button>
+          </div>
+          <div class="source-presets">
+            <button class="preset-chip" onclick="setSlackPreset('#engineering')">#engineering</button>
+            <button class="preset-chip" onclick="setSlackPreset('#incidents')">#incidents</button>
+            <button class="preset-chip" onclick="setSlackPreset('#product')">#product</button>
+            <button class="preset-chip" onclick="setSlackPreset('#general')">#general</button>
+          </div>
+          <div class="source-note">&#128274; Mock data &mdash; in production, connects via Slack Bot Token (Events API).</div>
+        </div>
+        <div class="source-signal-count" id="slack-signal-count"></div>
+        <div class="source-log" id="slack-log" style="display:none;"></div>
+      </div>
+      <!-- Calendar Card -->
+      <div class="source-card" id="source-calendar">
+        <div class="source-card-header">
+          <div class="source-card-title">
+            <div class="source-icon cal">&#128197;</div>
+            <div><h3>Calendar</h3><div class="source-desc">Sync meetings and events as signals</div></div>
+          </div>
+          <span class="source-status disconnected" id="cal-status">&#9679; Disconnected</span>
+        </div>
+        <div class="source-form">
+          <label>Time range</label>
+          <div style="display:flex;gap:8px;">
+            <select class="source-input" id="cal-range" style="flex:1;"><option>Today</option><option>This Week</option></select>
+            <button class="btn btn-primary btn-sm" onclick="connectCalendar()">Sync</button>
+          </div>
+          <div class="source-presets">
+            <button class="preset-chip" onclick="setCalPreset('Today')">&#128197; Today</button>
+            <button class="preset-chip" onclick="setCalPreset('This Week')">&#128198; This Week</button>
+          </div>
+          <div class="source-note">&#128274; Mock data &mdash; in production, connects via CalDAV, Google Calendar API, or Microsoft Graph.</div>
+        </div>
+        <div class="source-signal-count" id="cal-signal-count"></div>
+        <div class="source-log" id="cal-log" style="display:none;"></div>
+      </div>
     </div>
   </div>
 
@@ -381,6 +593,7 @@ let triageResults = [];
 let signalCounter = 0;
 let selectedIndex = -1;
 let currentFilter = 'all';
+let connectedSources = { github: [], rss: [], file: [], gmail: [], slack: [], calendar: [] };
 
 // ─── Triage Engine ──────────────────────────────────────────────
 
@@ -452,6 +665,285 @@ function triageSignal(sig) {
 }
 
 // ─── UI ─────────────────────────────────────────────────────────
+
+// ── Tab Switching ───────────────────────────────────────────
+function switchTab(tab) {
+  const body = document.querySelector('.app-body');
+  document.getElementById('tab-inbox').classList.toggle('active', tab === 'inbox');
+  document.getElementById('tab-sources').classList.toggle('active', tab === 'sources');
+  body.classList.toggle('sources-active', tab === 'sources');
+}
+
+// ── Source Connector Helpers ─────────────────────────────────
+function appendLog(logId, msg, type) {
+  const log = document.getElementById(logId);
+  log.style.display = 'block';
+  const entry = document.createElement('div');
+  entry.className = 'log-entry ' + (type || 'info');
+  entry.textContent = new Date().toLocaleTimeString() + ' ' + msg;
+  log.appendChild(entry);
+  log.scrollTop = log.scrollHeight;
+}
+
+function setSourceStatus(statusId, status, text) {
+  const el = document.getElementById(statusId);
+  el.className = 'source-status ' + status;
+  el.innerHTML = '&#9679; ' + text;
+}
+
+function addSourceSignals(sourceKey, newSignals, logId, countId, statusId, cardId) {
+  newSignals.forEach(s => {
+    const sig = { id: `${sourceKey}-${++signalCounter}`, ...s, timestamp: new Date(Date.now() - Math.random() * 86400000).toISOString() };
+    signals.unshift(sig);
+    triageResults.unshift(triageSignal(sig));
+    connectedSources[sourceKey].push(sig.id);
+  });
+  document.getElementById(countId).textContent = connectedSources[sourceKey].length + ' signals imported';
+  setSourceStatus(statusId, 'connected', 'Connected (' + connectedSources[sourceKey].length + ')');
+  document.getElementById(cardId).classList.add('connected');
+  updateSourceCount();
+  if (selectedIndex < 0) selectedIndex = 0;
+  renderAll();
+  switchTab('inbox');
+}
+
+function updateSourceCount() {
+  const total = Object.values(connectedSources).reduce((s, arr) => s + arr.length, 0);
+  document.getElementById('source-count').textContent = total;
+}
+
+// ── GitHub (REAL live fetch) ────────────────────────────────
+function setGHPreset(repo) {
+  document.getElementById('gh-repo-input').value = repo;
+  connectGitHub();
+}
+
+async function connectGitHub() {
+  const repo = document.getElementById('gh-repo-input').value.trim();
+  if (!repo || !repo.includes('/')) { appendLog('gh-log', 'Enter owner/repo format', 'error'); return; }
+  setSourceStatus('gh-status', 'fetching', 'Fetching...');
+  appendLog('gh-log', 'Fetching issues from ' + repo + '...', 'info');
+  try {
+    const res = await fetch('https://api.github.com/repos/' + repo + '/issues?per_page=15&state=open&sort=updated');
+    if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + res.statusText);
+    const issues = await res.json();
+    appendLog('gh-log', 'Received ' + issues.length + ' issues', 'success');
+    const newSignals = issues.filter(i => !i.pull_request).slice(0, 12).map(issue => ({
+      source: 'github', title: issue.title,
+      body: (issue.body || 'No description provided.').substring(0, 500),
+      author: issue.user ? issue.user.login : 'unknown',
+    }));
+    addSourceSignals('github', newSignals, 'gh-log', 'gh-signal-count', 'gh-status', 'source-github');
+    appendLog('gh-log', 'Imported ' + newSignals.length + ' signals into inbox', 'success');
+  } catch (err) {
+    setSourceStatus('gh-status', 'error', 'Error');
+    appendLog('gh-log', 'Failed: ' + err.message, 'error');
+  }
+}
+
+// ── RSS Feeds (mock data — CORS prevents real fetch) ────────
+const RSS_MOCK = {
+  'Hacker News': [
+    { title: 'Show HN: Open-source PM tool that triages signals with AI', body: 'A developer built an open-source tool for product managers to aggregate signals from GitHub, RSS, and files. Uses sentiment analysis and urgency scoring locally. Feature request from comments: Slack integration.' },
+    { title: 'Why we moved from Jira to Linear', body: 'Engineering teams are increasingly frustrated with Jira performance. Linear offers 10x faster UI. Discussion about migration challenges and data export workarounds.' },
+    { title: 'The state of WebAssembly in 2026', body: 'New survey shows 47% of developers use WASM in production. Performance benchmarks show 3x improvement over JS for data processing. Enhancement: could benefit our ETL pipeline.' },
+    { title: 'Critical RCE vulnerability in popular npm package', body: 'CVE-2026-4521 affects packages with 10M weekly downloads. Supply chain security incident. Patch available. Urgent: check your dependency tree immediately.' },
+    { title: 'Database scaling lessons from growing to 1B rows', body: 'Practical guide on PostgreSQL partitioning, read replicas, and connection pooling. Mentions common OOM issues with large datasets. Great reference for infrastructure teams.' },
+  ],
+  'TechCrunch': [
+    { title: 'AI coding assistants reach 80% developer adoption', body: 'Survey of 5000 developers shows AI pair programming tools now used daily by 80%. Productivity gains of 25-40% reported. Companies investing heavily in developer experience tooling.' },
+    { title: 'Open source funding crisis: maintainers burning out', body: 'Report highlights that 60% of critical OSS maintainers are unpaid volunteers. Several high-profile projects at risk. Community discussing sustainable funding models and corporate sponsorship.' },
+    { title: 'New browser APIs enable local-first applications', body: 'Origin Private File System and WebCodecs APIs enabling powerful local-first apps. No server needed for many use cases. Feature request potential for offline-capable tools.' },
+  ],
+  'Dev.to': [
+    { title: 'Building a personal PM dashboard with signals', body: 'Tutorial on aggregating product signals from multiple sources. Covers GitHub Issues API, RSS parsing, and sentiment classification. Suggestion to add Slack webhook integration for real-time alerts.' },
+    { title: 'How I reduced API response time by 90%', body: 'Case study on optimizing GraphQL resolvers with DataLoader pattern. Eliminated N+1 queries. Response time dropped from 2.3s to 0.2s. Performance improvement applicable to many backends.' },
+    { title: 'Accessibility is not optional: WCAG 2.2 guide', body: 'Comprehensive guide to WCAG 2.2 Level AA compliance. New success criteria for focus appearance and dragging movements. Improvement needed across most web applications.' },
+    { title: 'The hidden cost of microservices', body: 'Analysis of operational overhead when teams adopt microservices too early. Monitoring complexity, deploy pipeline fragmentation, and debugging distributed failures. Constructive take on monolith-first approach.' },
+  ],
+  'GitHub Blog': [
+    { title: 'GitHub Actions: ARM64 runners now generally available', body: 'ARM64 hosted runners for GitHub Actions are GA. 40% cost reduction for compatible workloads. CI/CD pipeline improvements for multi-architecture builds.' },
+    { title: 'New code scanning default setup for all repos', body: 'CodeQL code scanning now enabled by default on push. Security vulnerability detection built into the workflow. Enhancement to supply chain security posture.' },
+    { title: 'GitHub Copilot Workspace: from issue to code', body: 'New feature allows developers to go from a GitHub issue description to a fully implemented PR. AI-powered development workflow. Feature request: support for non-code artifacts like docs and configs.' },
+  ],
+};
+
+function setRSSPreset(name) {
+  document.getElementById('rss-url-input').value = name;
+  connectRSS();
+}
+
+function connectRSS() {
+  const name = document.getElementById('rss-url-input').value.trim();
+  if (!name) { appendLog('rss-log', 'Enter a feed name', 'error'); return; }
+  setSourceStatus('rss-status', 'fetching', 'Fetching...');
+  appendLog('rss-log', 'Connecting to "' + name + '"...', 'info');
+  const mockKey = Object.keys(RSS_MOCK).find(k => k.toLowerCase() === name.toLowerCase()) || Object.keys(RSS_MOCK)[0];
+  const items = RSS_MOCK[mockKey] || RSS_MOCK['Hacker News'];
+  setTimeout(function() {
+    appendLog('rss-log', 'Loaded ' + items.length + ' articles from ' + mockKey + ' (mocked)', 'success');
+    const newSignals = items.map(function(item) { return { source: 'rss', title: item.title, body: item.body, author: mockKey }; });
+    addSourceSignals('rss', newSignals, 'rss-log', 'rss-signal-count', 'rss-status', 'source-rss');
+  }, 800);
+}
+
+// ── Gmail / Email (mock — requires OAuth in production) ─────
+const GMAIL_MOCK = {
+  'Work Inbox': [
+    { title: 'Re: Q2 planning priorities — final alignment', body: 'Team, after reviewing the proposals, we should prioritize the API reliability initiative over the dashboard redesign. Customers are reporting frustrating latency issues daily. Lets discuss in the sync tomorrow.' },
+    { title: 'Escalation: Partner integration blocked by auth changes', body: 'Our OAuth flow change broke 3 partner integrations. They report authentication failures since Thursday. P1 urgency — partners threatening to evaluate alternatives if not resolved this week.' },
+    { title: 'Meeting notes: Architecture review — data pipeline', body: 'Summary: agreed to migrate from batch ETL to streaming. Spark job OOM issues are the main driver. Team will prototype Kafka-based pipeline. Timeline: POC in 2 sprints.' },
+    { title: 'FYI: New compliance requirements for Q3', body: 'Legal shared updated compliance audit requirements. WCAG 2.2 AA and SOC2 Type II now mandatory for all customer-facing products. Enhancement needed across 4 services.' },
+  ],
+  'Alerts': [
+    { title: 'ALERT: Production error rate above 5% on checkout API', body: 'Automated alert: Error rate exceeded threshold. 5.3% of checkout API calls returning 500. Started 14:23 UTC. Database connection pool exhaustion suspected. Incident investigation needed.' },
+    { title: 'ALERT: SSL certificate expiring in 7 days', body: 'Certificate for api.example.com expires soon. Auto-renewal failed — DNS validation error. Manual intervention required. Track this to prevent production outage.' },
+    { title: 'ALERT: CI build failures increased 300%', body: 'Build failure rate jumped from 5% to 20% in the last 24 hours. Root cause appears to be flaky ARM64 runner. Pipeline reliability degraded. Investigation in progress.' },
+  ],
+  'Newsletters': [
+    { title: 'Weekly product digest: Top feature requests', body: 'This weeks top requests: (1) Unified notification center — 45 votes, (2) Dark mode for admin panel — 32 votes, (3) Bulk export improvements — 28 votes. Constructive feedback overall. No critical gaps identified.' },
+    { title: 'Industry trends: Developer tooling market update', body: 'AI-powered dev tools market growing 40% YoY. Key trend: local-first architectures gaining traction. Companies investing in developer experience as differentiator. Nice overview for strategic planning.' },
+  ],
+};
+
+function setGmailPreset(category) {
+  document.getElementById('gmail-category').value = category;
+  connectGmail();
+}
+
+function connectGmail() {
+  setSourceStatus('gmail-status', 'fetching', 'Connecting...');
+  appendLog('gmail-log', 'Simulating OAuth flow...', 'info');
+  setTimeout(function() {
+    appendLog('gmail-log', 'Authenticated (mock)', 'success');
+    var category = document.getElementById('gmail-category').value || 'Work Inbox';
+    var items = GMAIL_MOCK[category] || GMAIL_MOCK['Work Inbox'];
+    appendLog('gmail-log', 'Loaded ' + items.length + ' emails from "' + category + '"', 'success');
+    var newSignals = items.map(function(item) { return { source: 'email', title: item.title, body: item.body, author: 'inbox' }; });
+    addSourceSignals('gmail', newSignals, 'gmail-log', 'gmail-signal-count', 'gmail-status', 'source-gmail');
+  }, 1200);
+}
+
+// ── Slack (mock — requires Bot token in production) ─────────
+const SLACK_MOCK = {
+  '#engineering': [
+    { title: 'Deploy v2.14.3 rolled back — DB migration failure', body: 'Heads up: rolled back the 2.14.3 deploy. The Postgres migration script timed out on the large users table. Need to split into smaller batches. Investigating root cause now.' },
+    { title: 'RFC: Switch from REST to gRPC for internal services', body: 'Proposing we move inter-service communication to gRPC. Benchmarks show 3x throughput improvement. Draft doc in the shared drive. Constructive feedback welcome.' },
+    { title: 'Flaky test suite blocking merges', body: 'The integration test suite has been flaky all week — 3 out of 10 runs fail randomly. Mostly timeout issues on the auth service mock. Frustrating for everyone trying to ship.' },
+  ],
+  '#incidents': [
+    { title: 'INC-2847: Search service returning stale results', body: 'Search index lag increased to 30 minutes. Elasticsearch cluster is under heavy load. Customer complaints coming in. P1 — SEV2 declared. War room opened.' },
+    { title: 'INC-2845 RESOLVED: Payment processing delay', body: 'Payment queue backlog cleared. Root cause: connection pool exhaustion on the payment gateway. Fix deployed. Post-incident review scheduled for Friday.' },
+    { title: 'Monitoring gap detected during canary deploy', body: 'Prometheus scraping missed new pods for 4 minutes during canary rollout. Grafana dashboards showed gaps. Need to adjust service discovery config. Tracking fix.' },
+  ],
+  '#product': [
+    { title: 'Customer interview insights: Enterprise onboarding', body: 'Key takeaway from 5 enterprise interviews: onboarding takes 3x longer than expected. Main pain points: SSO configuration and bulk user import. Feature request for guided setup wizard.' },
+    { title: 'Competitive intel: Competitor X launched AI triage', body: 'Competitor X just shipped AI-powered issue triage. Automatically classifies and routes incoming tickets. We should evaluate if this creates urgency for our own triage feature.' },
+    { title: 'NPS results: Q1 score dropped to 42', body: 'NPS dropped from 48 to 42 this quarter. Main detractor theme: slow response to bug reports. Negative sentiment in open-ended comments around reliability. Need action plan.' },
+  ],
+  '#general': [
+    { title: 'Welcome new team members joining this sprint', body: 'Please welcome Priya (backend) and Marco (data). They will be ramping up on the API gateway and ETL pipeline respectively. Buddy assignments sent. Positive vibes — great additions to the team.' },
+    { title: 'Office hours: Ask the platform team anything', body: 'Platform team hosting office hours Thursday 2pm. Bring your Kubernetes, CI/CD, and infrastructure questions. Last session was very helpful for debugging deploy issues.' },
+  ],
+};
+
+function setSlackPreset(channel) {
+  document.getElementById('slack-channel').value = channel;
+  connectSlack();
+}
+
+function connectSlack() {
+  setSourceStatus('slack-status', 'fetching', 'Connecting...');
+  appendLog('slack-log', 'Simulating Slack Bot auth...', 'info');
+  setTimeout(function() {
+    appendLog('slack-log', 'Bot connected (mock)', 'success');
+    var channel = document.getElementById('slack-channel').value || '#engineering';
+    var items = SLACK_MOCK[channel] || SLACK_MOCK['#engineering'];
+    appendLog('slack-log', 'Loaded ' + items.length + ' messages from ' + channel, 'success');
+    var newSignals = items.map(function(item) { return { source: 'slack', title: item.title, body: item.body, author: channel }; });
+    addSourceSignals('slack', newSignals, 'slack-log', 'slack-signal-count', 'slack-status', 'source-slack');
+  }, 900);
+}
+
+// ── Calendar (mock — requires CalDAV/Graph in production) ───
+const CALENDAR_MOCK = {
+  'Today': [
+    { title: 'Sprint Planning: API reliability improvements', body: 'Sprint planning session for the API reliability epic. Agenda: review P1 bugs, estimate new stories, assign owners. 14 story points carried over from last sprint. Medium priority for planning.' },
+    { title: '1:1 with Engineering Lead — escalation review', body: 'Discussion topics: (1) Connection pool exhaustion incidents — need permanent fix, (2) Team velocity trending down 15%, (3) Hiring update for senior backend role. High priority meeting.' },
+    { title: 'Partner sync: Integration API feedback', body: 'Monthly partner sync to review API integration issues. 3 partners reported auth flow breaking changes. Need to address backward compatibility. Customer-impact discussion.' },
+    { title: 'Architecture review: Event-driven migration', body: 'Review proposal to migrate notification system from polling to event-driven architecture. Expected 60% reduction in API calls. Constructive discussion with platform team.' },
+  ],
+  'This Week': [
+    { title: 'Monday: Sprint Planning — API reliability', body: 'Plan the sprint around P1 connection pool and auth issues. Velocity check. Story grooming for the next 2 weeks.' },
+    { title: 'Tuesday: Customer advisory board call', body: 'Quarterly customer advisory board. 5 enterprise customers sharing feedback. Main topic: onboarding improvements and SSO configuration pain points. Feature request collection.' },
+    { title: 'Wednesday: Post-incident review INC-2845', body: 'Review the payment processing delay incident. 5-why analysis. Identify repair items. Assign owners for follow-up tasks. Track to completion.' },
+    { title: 'Thursday: Product roadmap sync', body: 'Cross-team roadmap alignment. Review Q2 priorities. Discuss dependency on platform teams data pipeline migration. Escalate any blockers.' },
+    { title: 'Friday: Team retrospective', body: 'Sprint retro. Celebrate wins from the onboarding redesign (78% completion rate!). Discuss flaky test frustrations. Action items for next sprint.' },
+  ],
+};
+
+function setCalPreset(range) {
+  document.getElementById('cal-range').value = range;
+  connectCalendar();
+}
+
+function connectCalendar() {
+  setSourceStatus('cal-status', 'fetching', 'Syncing...');
+  appendLog('cal-log', 'Simulating calendar sync...', 'info');
+  setTimeout(function() {
+    appendLog('cal-log', 'Calendar connected (mock)', 'success');
+    var range = document.getElementById('cal-range').value || 'Today';
+    var items = CALENDAR_MOCK[range] || CALENDAR_MOCK['Today'];
+    appendLog('cal-log', 'Loaded ' + items.length + ' events for "' + range + '"', 'success');
+    var newSignals = items.map(function(item) { return { source: 'calendar', title: item.title, body: item.body, author: 'calendar' }; });
+    addSourceSignals('calendar', newSignals, 'cal-log', 'cal-signal-count', 'cal-status', 'source-calendar');
+  }, 700);
+}
+
+// ── File & Text (real local processing) ─────────────────────
+function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
+function handleDragLeave(e) { document.getElementById('drop-zone').classList.remove('drag-over'); }
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  processFiles(e.dataTransfer.files);
+}
+
+function handleFileInput(e) { processFiles(e.target.files); }
+
+function processFiles(files) {
+  Array.from(files).forEach(function(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var text = e.target.result;
+      appendLog('file-log', 'Read ' + file.name + ' (' + text.length + ' chars)', 'success');
+      var chunks = text.split(/\n\n+/).filter(function(c) { return c.trim().length > 20; });
+      var newSignals = chunks.slice(0, 10).map(function(chunk, i) {
+        return { source: 'file', title: file.name + ' — Section ' + (i + 1), body: chunk.trim().substring(0, 500), author: file.name };
+      });
+      addSourceSignals('file', newSignals, 'file-log', 'file-signal-count', 'file-status', 'source-file');
+      appendLog('file-log', 'Created ' + newSignals.length + ' signals from ' + file.name, 'success');
+    };
+    reader.readAsText(file);
+  });
+}
+
+function processTextPaste() {
+  var textarea = document.getElementById('text-paste');
+  var text = textarea.value.trim();
+  if (!text) { appendLog('file-log', 'No text to process', 'error'); return; }
+  var chunks = text.split(/\n\n+/).filter(function(c) { return c.trim().length > 10; });
+  appendLog('file-log', 'Processing ' + chunks.length + ' paragraph(s)...', 'info');
+  var newSignals = chunks.slice(0, 15).map(function(chunk, i) {
+    return { source: 'file', title: chunk.trim().split('\n')[0].substring(0, 80), body: chunk.trim().substring(0, 500), author: 'pasted-text' };
+  });
+  addSourceSignals('file', newSignals, 'file-log', 'file-signal-count', 'file-status', 'source-file');
+  textarea.value = '';
+  appendLog('file-log', 'Created ' + newSignals.length + ' signals from pasted text', 'success');
+}
+
+// ── Inbox Actions ───────────────────────────────────────────
 
 function addCustomSignal() {
   const input = document.getElementById('signal-input');
