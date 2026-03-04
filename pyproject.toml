@@ -1,0 +1,88 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pm-signals"
+version = "0.1.0"
+description = "Multi-source signal aggregation framework — fetch, classify, triage, and brief from GitHub, RSS, files, and more."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Akshay Dixit", email = "kustonaut@users.noreply.github.com"},
+]
+keywords = [
+    "signals",
+    "aggregation",
+    "triage",
+    "daily-brief",
+    "project-management",
+    "sentiment-analysis",
+    "classification",
+    "pipeline",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Office/Business :: Scheduling",
+]
+dependencies = [
+    "pyyaml>=6.0",
+    "click>=8.1.0",
+    "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+rss = [
+    "feedparser>=6.0",
+]
+llm = [
+    "openai>=1.0",
+    "anthropic>=0.18",
+]
+all = [
+    "pm-signals[rss,llm]",
+]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.3.0",
+    "mypy>=1.8",
+    "types-PyYAML",
+    "types-requests",
+]
+
+[project.scripts]
+pm-signals = "pm_signals.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/kustonaut/pm-signals"
+Repository = "https://github.com/kustonaut/pm-signals"
+Issues = "https://github.com/kustonaut/pm-signals/issues"
+Documentation = "https://kustonaut.github.io/pm-signals"
+Demo = "https://kustonaut.github.io/pm-signals/demo.html"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pm_signals"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

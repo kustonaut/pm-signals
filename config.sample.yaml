@@ -1,0 +1,91 @@
+# pm-signals configuration
+# Copy this file to config.yaml and customize.
+
+# Project areas — signals are routed to the best-matching area
+# based on keyword matches in title + body.
+projects:
+  Frontend:
+    keywords:
+      - react
+      - vue
+      - angular
+      - css
+      - UI
+      - component
+      - dashboard
+      - page
+      - render
+      - responsive
+      - mobile
+      - accessibility
+  Backend:
+    keywords:
+      - api
+      - server
+      - database
+      - endpoint
+      - REST
+      - GraphQL
+      - authentication
+      - microservice
+      - rate limit
+      - cache
+      - queue
+  Infrastructure:
+    keywords:
+      - deploy
+      - CI/CD
+      - docker
+      - kubernetes
+      - terraform
+      - AWS
+      - Azure
+      - GCP
+      - pipeline
+      - monitoring
+      - Grafana
+      - Prometheus
+  Data:
+    keywords:
+      - pipeline
+      - ETL
+      - analytics
+      - warehouse
+      - Spark
+      - Kafka
+      - stream
+      - batch
+      - data quality
+      - metrics
+
+# Signal fetchers — enable the ones you need
+fetchers:
+  github:
+    enabled: false
+    # repos: ["your-org/your-repo"]  # Optional: filter to specific repos
+  rss:
+    enabled: false
+    # feeds:
+    #   - https://blog.example.com/feed.xml
+    #   - https://status.example.com/rss
+  file_watcher:
+    enabled: false
+    # directories:
+    #   - ./inbox
+    #   - /path/to/signal/drops
+    # extensions: [".md", ".txt", ".json"]
+  sample:
+    enabled: true   # Built-in demo data — disable for production
+    # count: 20
+
+# Pipeline settings
+pipeline:
+  archive_days: 14    # Archive output files after N days
+  delete_days: 60     # Delete archived files after N days
+
+# LLM settings (optional — everything works without this)
+llm:
+  enabled: false
+  # provider: openai     # openai | anthropic
+  # model: gpt-4o-mini
+  # temperature: 0.3

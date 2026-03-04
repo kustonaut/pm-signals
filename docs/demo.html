@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pm-signals — Interactive Demo</title>
+<style>
+  :root {
+    --bg-primary: #0a0e1a;
+    --bg-card: rgba(15, 20, 40, 0.75);
+    --bg-glass: rgba(20, 30, 60, 0.5);
+    --border-glass: rgba(100, 140, 255, 0.15);
+    --accent-blue: #4f8fff;
+    --accent-cyan: #00d4ff;
+    --accent-purple: #a78bfa;
+    --accent-green: #34d399;
+    --accent-orange: #fb923c;
+    --accent-red: #f87171;
+    --accent-yellow: #fbbf24;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background */
+  .bg-orbs {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  }
+  .bg-orbs .orb {
+    position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.15;
+    animation: float 20s ease-in-out infinite alternate;
+  }
+  .bg-orbs .orb:nth-child(1) { width: 600px; height: 600px; background: var(--accent-blue); top: -10%; left: -5%; animation-delay: 0s; }
+  .bg-orbs .orb:nth-child(2) { width: 500px; height: 500px; background: var(--accent-purple); top: 40%; right: -10%; animation-delay: -7s; }
+  .bg-orbs .orb:nth-child(3) { width: 400px; height: 400px; background: var(--accent-cyan); bottom: -5%; left: 30%; animation-delay: -14s; }
+  @keyframes float {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(40px, -30px) scale(1.1); }
+  }
+
+  /* Grid pattern overlay */
+  .grid-pattern {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(79,143,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,143,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* Layout */
+  .container { max-width: 1360px; margin: 0 auto; padding: 2rem; position: relative; z-index: 1; }
+
+  /* Header */
+  .hero {
+    text-align: center; padding: 3rem 0 2rem;
+  }
+  .hero h1 {
+    font-size: 3rem; font-weight: 800; letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan), var(--accent-purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero .subtitle {
+    font-size: 1.15rem; color: var(--text-secondary); margin-top: 0.5rem; max-width: 640px; margin-inline: auto;
+  }
+  .hero .badge {
+    display: inline-block; margin-top: 1rem; padding: 0.35rem 1rem;
+    background: rgba(79,143,255,0.12); border: 1px solid rgba(79,143,255,0.25);
+    border-radius: 999px; font-size: 0.8rem; color: var(--accent-blue); font-weight: 600;
+  }
+
+  /* Pipeline visualization */
+  .pipeline-flow {
+    display: flex; align-items: center; justify-content: center; gap: 0.25rem;
+    margin: 2rem 0; flex-wrap: wrap;
+  }
+  .pipeline-step {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 1.25rem; border-radius: var(--radius-sm);
+    background: var(--bg-glass); border: 1px solid var(--border-glass);
+    backdrop-filter: blur(12px); font-size: 0.85rem; font-weight: 600;
+    transition: all 0.3s; cursor: default;
+  }
+  .pipeline-step:hover { border-color: var(--accent-blue); transform: translateY(-2px); }
+  .pipeline-step.active { border-color: var(--accent-cyan); box-shadow: 0 0 20px rgba(0,212,255,0.15); }
+  .pipeline-arrow { color: var(--text-muted); font-size: 1.2rem; }
+
+  /* Glass cards */
+  .glass-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius);
+    backdrop-filter: blur(16px);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .glass-card h2 {
+    font-size: 1.2rem; margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  /* Two-column layout */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* Signal input area */
+  .signal-input {
+    width: 100%; min-height: 100px; padding: 1rem;
+    background: rgba(15,20,40,0.6); border: 1px solid var(--border-glass);
+    border-radius: var(--radius-sm); color: var(--text-primary);
+    font-family: inherit; font-size: 0.9rem; resize: vertical;
+    outline: none; transition: border-color 0.3s;
+  }
+  .signal-input:focus { border-color: var(--accent-blue); }
+  .signal-input::placeholder { color: var(--text-muted); }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.6rem 1.2rem; border: none; border-radius: var(--radius-sm);
+    font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+    color: #fff;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(79,143,255,0.3); }
+  .btn-secondary {
+    background: var(--bg-glass); color: var(--text-primary);
+    border: 1px solid var(--border-glass);
+  }
+  .btn-secondary:hover { border-color: var(--accent-blue); }
+
+  .btn-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+
+  /* Signal feed */
+  .signal-feed { max-height: 500px; overflow-y: auto; }
+  .signal-feed::-webkit-scrollbar { width: 6px; }
+  .signal-feed::-webkit-scrollbar-track { background: transparent; }
+  .signal-feed::-webkit-scrollbar-thumb { background: rgba(100,140,255,0.2); border-radius: 3px; }
+
+  .signal-card {
+    padding: 0.8rem 1rem; border-radius: var(--radius-sm);
+    background: rgba(20,30,60,0.4); border: 1px solid rgba(100,140,255,0.08);
+    margin-bottom: 0.5rem; transition: all 0.3s;
+    animation: slideIn 0.3s ease;
+  }
+  .signal-card:hover { border-color: rgba(100,140,255,0.2); transform: translateX(3px); }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+  .signal-card .header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;
+  }
+  .signal-card .title { font-weight: 600; font-size: 0.85rem; }
+  .signal-card .source {
+    font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 999px;
+    background: rgba(79,143,255,0.12); color: var(--accent-blue);
+  }
+  .signal-card .body { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4; }
+  .signal-card .meta { display: flex; gap: 0.5rem; margin-top: 0.4rem; flex-wrap: wrap; }
+
+  /* Badges */
+  .badge-sm {
+    font-size: 0.65rem; padding: 0.12rem 0.45rem; border-radius: 999px; font-weight: 600;
+  }
+  .badge-critical { background: rgba(248,113,113,0.15); color: var(--accent-red); }
+  .badge-high { background: rgba(251,146,60,0.15); color: var(--accent-orange); }
+  .badge-medium { background: rgba(251,191,36,0.15); color: var(--accent-yellow); }
+  .badge-low { background: rgba(52,211,153,0.15); color: var(--accent-green); }
+  .badge-frustrated { background: rgba(248,113,113,0.15); color: var(--accent-red); }
+  .badge-negative { background: rgba(251,146,60,0.15); color: var(--accent-orange); }
+  .badge-neutral { background: rgba(148,163,184,0.15); color: var(--text-secondary); }
+  .badge-constructive { background: rgba(167,139,250,0.15); color: var(--accent-purple); }
+  .badge-positive { background: rgba(52,211,153,0.15); color: var(--accent-green); }
+  .badge-project {
+    background: rgba(79,143,255,0.1); color: var(--accent-blue); border: 1px solid rgba(79,143,255,0.2);
+  }
+
+  /* Stats grid */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; }
+  .stat-card {
+    text-align: center; padding: 1rem; border-radius: var(--radius-sm);
+    background: rgba(20,30,60,0.4); border: 1px solid rgba(100,140,255,0.08);
+  }
+  .stat-card .value { font-size: 2rem; font-weight: 800; }
+  .stat-card .label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+  .stat-card.critical .value { color: var(--accent-red); }
+  .stat-card.high .value { color: var(--accent-orange); }
+  .stat-card.medium .value { color: var(--accent-yellow); }
+  .stat-card.low .value { color: var(--accent-green); }
+
+  /* Brief output */
+  .brief-output {
+    background: rgba(15,20,40,0.6); border: 1px solid var(--border-glass);
+    border-radius: var(--radius-sm); padding: 1.25rem;
+    font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap;
+    max-height: 500px; overflow-y: auto; color: var(--text-secondary);
+  }
+  .brief-output h1, .brief-output h2, .brief-output h3 { color: var(--text-primary); margin: 0.5rem 0; }
+  .brief-output strong { color: var(--text-primary); }
+
+  /* Chart area */
+  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; }
+  @media (max-width: 900px) { .chart-row { grid-template-columns: 1fr; } }
+  .chart-container { height: 300px; position: relative; }
+  canvas { width: 100% !important; height: 100% !important; }
+
+  /* Footer */
+  .footer {
+    text-align: center; padding: 2rem 0; color: var(--text-muted); font-size: 0.8rem;
+  }
+  .footer a { color: var(--accent-blue); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  /* Pulse animation for live indicator */
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .live-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--accent-green);
+    display: inline-block; animation: pulse 2s infinite;
+  }
+</style>
+</head>
+<body>
+<div class="bg-orbs">
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+</div>
+<div class="grid-pattern"></div>
+
+<div class="container">
+  <!-- Hero -->
+  <div class="hero">
+    <h1>pm-signals</h1>
+    <p class="subtitle">Multi-source signal intelligence for product managers. Fetch, classify, and synthesize signals from GitHub, RSS, files, and more — all in one pipeline.</p>
+    <span class="badge">v0.1.0 · Open Source · Zero Config Demo</span>
+  </div>
+
+  <!-- Pipeline Flow -->
+  <div class="pipeline-flow">
+    <div class="pipeline-step" id="step-fetch">📡 Fetch</div>
+    <span class="pipeline-arrow">→</span>
+    <div class="pipeline-step" id="step-route">🗂️ Route</div>
+    <span class="pipeline-arrow">→</span>
+    <div class="pipeline-step" id="step-sentiment">💬 Sentiment</div>
+    <span class="pipeline-arrow">→</span>
+    <div class="pipeline-step" id="step-urgency">🚨 Urgency</div>
+    <span class="pipeline-arrow">→</span>
+    <div class="pipeline-step" id="step-brief">📋 Brief</div>
+  </div>
+
+  <!-- Stats Dashboard -->
+  <div class="stats-grid" id="stats-grid">
+    <div class="stat-card"><div class="value" id="stat-total">0</div><div class="label">Signals</div></div>
+    <div class="stat-card critical"><div class="value" id="stat-critical">0</div><div class="label">Critical</div></div>
+    <div class="stat-card high"><div class="value" id="stat-high">0</div><div class="label">High</div></div>
+    <div class="stat-card medium"><div class="value" id="stat-medium">0</div><div class="label">Medium</div></div>
+    <div class="stat-card low"><div class="value" id="stat-low">0</div><div class="label">Low</div></div>
+    <div class="stat-card"><div class="value" id="stat-projects">0</div><div class="label">Projects</div></div>
+  </div>
+
+  <!-- Main content -->
+  <div class="two-col" style="margin-top:1.5rem;">
+    <!-- Left: Input + Signal Feed -->
+    <div>
+      <div class="glass-card">
+        <h2>🧪 Try It — Add a Signal</h2>
+        <textarea class="signal-input" id="signal-input" placeholder="Type or paste a signal...\n\nExamples:\n• Production API returning 500 errors — critical performance regression\n• Feature request: add dark mode to the dashboard\n• Great work on the new search feature! Users love it."></textarea>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="addCustomSignal()">⚡ Analyze</button>
+          <button class="btn btn-secondary" onclick="loadSampleSignals()">📦 Load 20 Samples</button>
+          <button class="btn btn-secondary" onclick="clearAll()">🗑️ Clear</button>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <h2><span class="live-dot"></span> Signal Feed</h2>
+        <div class="signal-feed" id="signal-feed">
+          <div style="text-align:center;padding:2rem;color:var(--text-muted);">
+            Add a signal above or load sample data to start.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Triage Results + Brief -->
+    <div>
+      <div class="glass-card">
+        <h2>📋 Generated Brief</h2>
+        <div class="brief-output" id="brief-output">
+          Run the pipeline to generate an intelligence brief.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-row">
+    <div class="glass-card">
+      <h2>📊 Urgency Distribution</h2>
+      <div class="chart-container"><canvas id="urgency-chart"></canvas></div>
+    </div>
+    <div class="glass-card">
+      <h2>📊 Project Breakdown</h2>
+      <div class="chart-container"><canvas id="project-chart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Built by <a href="https://github.com/kustonaut" target="_blank">@kustonaut</a> · <a href="https://github.com/kustonaut/pm-signals" target="_blank">GitHub</a> · MIT License</p>
+    <p style="margin-top:0.5rem;">Part of the <a href="https://github.com/kustonaut" target="_blank">PM Intelligence</a> open-source toolkit</p>
+  </div>
+</div>
+
+<!-- Minimal chart library (no external deps) -->
+<script>
+// ─── Signal Engine (runs entirely in browser) ────────────────────────
+
+const PROJECT_KEYWORDS = {
+  'Frontend': ['react','vue','angular','css','ui','component','dashboard','page','render','dom','layout','responsive','mobile','accessibility','a11y','button','modal','form'],
+  'Backend': ['api','server','database','endpoint','rest','graphql','authentication','auth','microservice','rate limit','connection pool','cache','query','sql','redis','queue'],
+  'Infrastructure': ['deploy','ci/cd','docker','kubernetes','k8s','terraform','aws','azure','gcp','pipeline','monitoring','grafana','prometheus','helm','autoscal','load balanc','cdn','ssl'],
+  'Data': ['pipeline','etl','analytics','warehouse','spark','kafka','stream','batch','schema','migration','data quality','null','metrics','dashboard','bigquery','snowflake','dbt']
+};
+
+const SENTIMENT_PATTERNS = {
+  frustrated: [
+    [/\b(frustrated|frustrating)\b/i, 0.8],
+    [/\b(broken|still broken|keeps breaking)\b/i, 0.7],
+    [/\b(unacceptable|ridiculous)\b/i, 0.9],
+    [/\b(wast(?:e|ed|ing) time)\b/i, 0.7],
+    [/\b(no response|ignored|no update)\b/i, 0.6],
+    [/\b(terrible|horrible|awful)\b/i, 0.8],
+    [/!!+/, 0.5],
+  ],
+  negative: [
+    [/\b(bug|issue|problem|fail(?:ed)?|error)\b/i, 0.3],
+    [/\b(slow|poor|bad|wrong)\b/i, 0.4],
+    [/\b(cannot|can't|doesn't work|not working)\b/i, 0.5],
+    [/\b(crash(?:es|ed|ing)?)\b/i, 0.5],
+    [/\b(timeout|timed? out)\b/i, 0.4],
+  ],
+  positive: [
+    [/\b(thanks|thank you|great|awesome)\b/i, 0.4],
+    [/\b(works|working|resolved|fixed)\b/i, 0.3],
+    [/\b(love|excellent|perfect)\b/i, 0.5],
+    [/\b(helpful|useful|appreciate)\b/i, 0.4],
+    [/\b(well done|nice work|good job)\b/i, 0.5],
+  ],
+  constructive: [
+    [/\b(suggest(?:ion)?|proposal|idea)\b/i, 0.4],
+    [/\b(would be nice|feature request|enhancement)\b/i, 0.3],
+    [/\b(workaround|alternative)\b/i, 0.3],
+    [/\b(could we|what if|how about)\b/i, 0.3],
+    [/\b(improvement|improve)\b/i, 0.3],
+  ],
+};
+
+const URGENCY_PATTERNS = {
+  critical: [
+    [/\b(security|vulnerability|CVE-\d+)\b/i, 1.0],
+    [/\b(data loss|data corruption)\b/i, 0.95],
+    [/\b(production down|service down)\b/i, 0.9],
+    [/\b(outage|site down)\b/i, 0.85],
+    [/\b(P0|Sev[- ]?0|Sev[- ]?1)\b/i, 0.9],
+    [/\b(incident|emergency)\b/i, 0.8],
+  ],
+  high: [
+    [/\b(P1|Sev[- ]?2)\b/i, 0.7],
+    [/\b(escalation|escalated)\b/i, 0.65],
+    [/\b(urgent|urgently)\b/i, 0.7],
+    [/\b(regression|regressed)\b/i, 0.65],
+    [/\b(blocking|blocker)\b/i, 0.6],
+    [/\b(ASAP|immediately)\b/i, 0.65],
+    [/\b(customer[- ]impact)\b/i, 0.7],
+    [/\b(OOM|out of memory)\b/i, 0.6],
+  ],
+  medium: [
+    [/\b(P2|Sev[- ]?3)\b/i, 0.4],
+    [/\b(bug|defect)\b/i, 0.3],
+    [/\b(performance|slow|latency)\b/i, 0.35],
+    [/\b(feature request|enhancement)\b/i, 0.25],
+    [/\b(compliance|audit)\b/i, 0.4],
+  ],
+  low: [
+    [/\b(P3|Sev[- ]?4)\b/i, 0.15],
+    [/\b(question|documentation)\b/i, 0.1],
+    [/\b(minor|cosmetic|typo)\b/i, 0.1],
+    [/\b(nice to have|low priority)\b/i, 0.1],
+    [/\b(suggestion|idea)\b/i, 0.1],
+  ],
+};
+
+const SAMPLE_SIGNALS = [
+  { source: 'github', title: 'Mobile dashboard not rendering on iOS Safari', body: 'Users report the dashboard crashes on Safari 17. Frustrating — this is a P1 regression from the latest release. The team has been ignoring this for two weeks now.' },
+  { source: 'github', title: 'CSV export produces corrupted UTF-8 headers', body: 'When exporting data to CSV, non-ASCII characters in headers get corrupted. Bug confirmed on Chrome and Firefox. Workaround: export as JSON then convert.' },
+  { source: 'github', title: 'Feature request: Dark mode for settings page', body: 'Would be nice to have dark mode on the settings page. The rest of the app has it, but settings is still bright white. Enhancement for better consistency.' },
+  { source: 'github', title: 'Real-time collaboration cursors disappear', body: 'In collaborative editing, other users cursors vanish after about 30 seconds of inactivity. This is a WebSocket keepalive issue. Not blocking but confusing.' },
+  { source: 'rss', title: 'API rate limiting returning 500 instead of 429', body: 'When rate limits are hit, the API returns a 500 Internal Server Error instead of the correct 429 Too Many Requests. This is causing broken retry logic in client applications. Urgent — customer-impact is high.' },
+  { source: 'github', title: 'Connection pool exhaustion under peak load', body: 'Database connection pool exhaustion during peak hours (2-4pm UTC). PostgreSQL max_connections reached. OOM killer triggered twice this week. Production is unstable.' },
+  { source: 'rss', title: 'GraphQL N+1 query problem on user profiles', body: 'The user profiles endpoint triggers N+1 queries when fetching related organizations. Performance degrades to 8s response time with 100+ orgs. Need DataLoader pattern.' },
+  { source: 'github', title: 'Search results cache staleness', body: 'Search index updates lag by 15-20 minutes. Users see stale results after creating new items. Redis cache TTL may be too long. Feature request to add manual cache invalidation.' },
+  { source: 'file', title: 'CI/CD pipeline failing on ARM64 builds', body: 'GitHub Actions ARM64 runners fail intermittently on the Docker build step. Error: unable to resolve reference. This blocks our multi-arch deployment strategy. P1 escalation.' },
+  { source: 'file', title: 'Kubernetes autoscaling overshoot problem', body: 'HPA triggers scale-up too aggressively — 2 pods become 12 in 60 seconds, then scale-down creates request spikes. Need to tune scaleDown stabilization window.' },
+  { source: 'github', title: 'Terraform state locking race condition', body: 'Terraform state locks are occasionally failing to acquire during concurrent pipeline runs. This corrupted state twice last month. Need to investigate DynamoDB backend.' },
+  { source: 'rss', title: 'Grafana dashboard gaps during deployments', body: 'Monitoring gaps appear during rolling deployments — about 2-3 minutes of missing data per deploy. Prometheus scrape targets briefly unreachable. Track this issue.' },
+  { source: 'github', title: 'Data pipeline null timestamp handling', body: 'ETL pipeline silently drops rows with null timestamps instead of applying defaults. 0.3% data loss over the past week. Data quality issue — needs investigation.' },
+  { source: 'file', title: 'ETL job OOM on large partner datasets', body: 'Spark ETL job crashes with OutOfMemoryError on datasets >50GB. Need to implement incremental processing or increase executor memory. Blocking monthly analytics.' },
+  { source: 'github', title: 'Accessibility audit — missing ARIA labels', body: 'WAVE audit found 23 missing ARIA labels across the checkout flow. WCAG 2.1 AA compliance requirement for Q2. Feature request from the accessibility team.' },
+  { source: 'rss', title: 'Authentication token refresh failing silently', body: 'OAuth refresh tokens are expiring without triggering re-auth flow. Users get logged out with no error message. Bug in the token interceptor middleware.' },
+  { source: 'github', title: 'Great work on the new onboarding flow!', body: 'The new user onboarding wizard is excellent! Completion rates jumped from 34% to 78% after the redesign. Well done team — love the progress indicators.' },
+  { source: 'file', title: 'Suggestion: Unified notification center', body: 'Idea: create a single notification center that aggregates alerts from all sources (email, Slack, webhooks, RSS). Would reduce context-switching for PMs.' },
+  { source: 'github', title: 'Security vulnerability in XML parser', body: 'CVE-2025-1234 affects our XML parsing library. XXE injection possible via crafted SVG uploads. Security patch required immediately. Critical severity.' },
+  { source: 'rss', title: 'Form validation component rewrite proposal', body: 'Proposing a rewrite of the form validation library to support async validators and better TypeScript types. Improvement that would benefit all frontend teams.' },
+];
+
+let signals = [];
+let triageResults = [];
+let signalCounter = 0;
+
+// ─── Triage Engine ──────────────────────────────────────────────────
+
+function routeSignal(text) {
+  let best = { project: 'unclassified', confidence: 0, keywords: [] };
+  for (const [project, keywords] of Object.entries(PROJECT_KEYWORDS)) {
+    const matched = keywords.filter(kw => text.toLowerCase().includes(kw.toLowerCase()));
+    if (matched.length > 0) {
+      const confidence = Math.min(1, (matched.length / keywords.length) * 2);
+      if (confidence > best.confidence) {
+        best = { project, confidence: Math.round(confidence * 1000) / 1000, keywords: matched };
+      }
+    }
+  }
+  return best;
+}
+
+function analyzeSentiment(text) {
+  let score = 0;
+  for (const [pattern, weight] of SENTIMENT_PATTERNS.frustrated) {
+    if (pattern.test(text)) score -= weight;
+  }
+  for (const [pattern, weight] of SENTIMENT_PATTERNS.negative) {
+    if (pattern.test(text)) score -= weight;
+  }
+  for (const [pattern, weight] of SENTIMENT_PATTERNS.positive) {
+    if (pattern.test(text)) score += weight;
+  }
+  for (const [pattern, weight] of SENTIMENT_PATTERNS.constructive) {
+    if (pattern.test(text)) score += weight * 0.5;
+  }
+  score = Math.max(-1, Math.min(1, score));
+  let label;
+  if (score <= -0.6) label = 'frustrated';
+  else if (score <= -0.2) label = 'negative';
+  else if (score >= 0.4) label = 'positive';
+  else if (score >= 0.15) label = 'constructive';
+  else label = 'neutral';
+  return { label, score: Math.round(score * 1000) / 1000 };
+}
+
+function scoreUrgency(text) {
+  let maxScore = 0;
+  let matched = [];
+  for (const [pattern, weight] of URGENCY_PATTERNS.critical) {
+    if (pattern.test(text)) { maxScore = Math.max(maxScore, weight); matched.push('critical'); }
+  }
+  for (const [pattern, weight] of URGENCY_PATTERNS.high) {
+    if (pattern.test(text)) { maxScore = Math.max(maxScore, weight); matched.push('high'); }
+  }
+  for (const [pattern, weight] of URGENCY_PATTERNS.medium) {
+    if (pattern.test(text)) { maxScore = Math.max(maxScore, 0.3 + weight * 0.3); matched.push('medium'); }
+  }
+  for (const [pattern, weight] of URGENCY_PATTERNS.low) {
+    if (pattern.test(text)) { if (maxScore === 0) maxScore = weight; matched.push('low'); }
+  }
+  let level;
+  if (maxScore >= 0.8) level = 'critical';
+  else if (maxScore >= 0.55) level = 'high';
+  else if (maxScore >= 0.25) level = 'medium';
+  else level = 'low';
+  return { level, score: Math.round(maxScore * 1000) / 1000, matched };
+}
+
+function triageSignal(sig) {
+  const text = `${sig.title} ${sig.body}`;
+  const route = routeSignal(text);
+  const sentiment = analyzeSentiment(text);
+  const urgency = scoreUrgency(text);
+  return { id: sig.id, ...route, sentiment: sentiment.label, sentimentScore: sentiment.score, urgency: urgency.level, urgencyScore: urgency.score };
+}
+
+// ─── UI Rendering ───────────────────────────────────────────────────
+
+function addCustomSignal() {
+  const input = document.getElementById('signal-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  // Parse: first line = title, rest = body
+  const lines = text.split('\n');
+  const title = lines[0];
+  const body = lines.slice(1).join('\n').trim() || title;
+
+  const sig = { id: `custom-${++signalCounter}`, source: 'custom', title, body, author: 'you', timestamp: new Date().toISOString() };
+  signals.push(sig);
+  triageResults.push(triageSignal(sig));
+
+  input.value = '';
+  renderAll();
+  animatePipeline();
+}
+
+function loadSampleSignals() {
+  SAMPLE_SIGNALS.forEach(s => {
+    const sig = { id: `sample-${++signalCounter}`, ...s, author: ['dev-sarah','pm-alex','ops-taylor','data-jamie','dev-marco','dev-priya','dev-chen'][Math.floor(Math.random()*7)], timestamp: new Date(Date.now() - Math.random()*86400000).toISOString() };
+    signals.push(sig);
+    triageResults.push(triageSignal(sig));
+  });
+  renderAll();
+  animatePipeline();
+}
+
+function clearAll() {
+  signals = [];
+  triageResults = [];
+  signalCounter = 0;
+  renderAll();
+}
+
+function animatePipeline() {
+  const steps = ['step-fetch','step-route','step-sentiment','step-urgency','step-brief'];
+  steps.forEach((id, i) => {
+    setTimeout(() => {
+      document.getElementById(id).classList.add('active');
+      setTimeout(() => document.getElementById(id).classList.remove('active'), 600);
+    }, i * 300);
+  });
+}
+
+function renderAll() {
+  renderFeed();
+  renderStats();
+  renderBrief();
+  renderCharts();
+}
+
+function renderFeed() {
+  const feed = document.getElementById('signal-feed');
+  if (signals.length === 0) {
+    feed.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Add a signal above or load sample data to start.</div>';
+    return;
+  }
+
+  feed.innerHTML = signals.slice().reverse().map((sig, idx) => {
+    const result = triageResults[signals.length - 1 - idx];
+    const urgencyEmoji = { critical: '🔴', high: '🟠', medium: '🟡', low: '🟢' }[result?.urgency] || '⚪';
+    return `
+      <div class="signal-card">
+        <div class="header">
+          <span class="title">${urgencyEmoji} ${escapeHtml(sig.title)}</span>
+          <span class="source">${sig.source}</span>
+        </div>
+        <div class="body">${escapeHtml((sig.body || '').substring(0, 120))}${sig.body?.length > 120 ? '...' : ''}</div>
+        <div class="meta">
+          ${result ? `
+            <span class="badge-sm badge-${result.urgency}">${result.urgency}</span>
+            <span class="badge-sm badge-${result.sentiment}">${result.sentiment}</span>
+            <span class="badge-sm badge-project">${result.project}</span>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderStats() {
+  document.getElementById('stat-total').textContent = signals.length;
+  const urgencyCounts = { critical: 0, high: 0, medium: 0, low: 0 };
+  const projectSet = new Set();
+  triageResults.forEach(r => {
+    urgencyCounts[r.urgency] = (urgencyCounts[r.urgency] || 0) + 1;
+    projectSet.add(r.project);
+  });
+  document.getElementById('stat-critical').textContent = urgencyCounts.critical;
+  document.getElementById('stat-high').textContent = urgencyCounts.high;
+  document.getElementById('stat-medium').textContent = urgencyCounts.medium;
+  document.getElementById('stat-low').textContent = urgencyCounts.low;
+  document.getElementById('stat-projects').textContent = projectSet.size;
+}
+
+function renderBrief() {
+  const output = document.getElementById('brief-output');
+  if (signals.length === 0) {
+    output.textContent = 'Run the pipeline to generate an intelligence brief.';
+    return;
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  const urgencyCounts = { critical: 0, high: 0, medium: 0, low: 0 };
+  const projectSignals = {};
+  const sentimentCounts = {};
+
+  triageResults.forEach((r, i) => {
+    urgencyCounts[r.urgency] = (urgencyCounts[r.urgency] || 0) + 1;
+    sentimentCounts[r.sentiment] = (sentimentCounts[r.sentiment] || 0) + 1;
+    if (!projectSignals[r.project]) projectSignals[r.project] = [];
+    projectSignals[r.project].push({ ...r, title: signals[i].title, source: signals[i].source });
+  });
+
+  const urgencyOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+  const urgencyEmoji = { critical: '🔴', high: '🟠', medium: '🟡', low: '🟢' };
+
+  let md = `# 📋 Daily Intelligence Brief — ${today}\n\n`;
+  md += `**${signals.length} signals** from ${new Set(signals.map(s=>s.source)).size} sources. `;
+  if (urgencyCounts.critical > 0) md += `🔴 **${urgencyCounts.critical} critical.** `;
+  if (urgencyCounts.high > 0) md += `🟠 **${urgencyCounts.high} high.** `;
+  if (sentimentCounts.frustrated) md += `⚠️ ${sentimentCounts.frustrated} frustrated signals. `;
+  md += '\n\n---\n\n';
+
+  const sortedProjects = Object.keys(projectSignals).sort((a,b) => {
+    const aMax = Math.min(...projectSignals[a].map(s => urgencyOrder[s.urgency] ?? 4));
+    const bMax = Math.min(...projectSignals[b].map(s => urgencyOrder[s.urgency] ?? 4));
+    return aMax - bMax;
+  });
+
+  for (const project of sortedProjects) {
+    const items = projectSignals[project].sort((a,b) => (urgencyOrder[a.urgency]??4) - (urgencyOrder[b.urgency]??4));
+    md += `## ${project} (${items.length})\n\n`;
+    items.forEach(item => {
+      md += `${urgencyEmoji[item.urgency]||'⚪'} **${item.title}** — ${item.sentiment} · ${item.urgency} · [${item.source}]\n`;
+    });
+    md += '\n';
+  }
+
+  md += `---\n\n*Generated by pm-signals v0.1.0*`;
+  output.textContent = md;
+}
+
+function renderCharts() {
+  renderUrgencyChart();
+  renderProjectChart();
+}
+
+function renderUrgencyChart() {
+  const canvas = document.getElementById('urgency-chart');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = canvas.offsetWidth * dpr;
+  canvas.height = canvas.offsetHeight * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+
+  const counts = { critical: 0, high: 0, medium: 0, low: 0 };
+  triageResults.forEach(r => counts[r.urgency] = (counts[r.urgency]||0)+1);
+  const data = Object.entries(counts);
+  const total = data.reduce((s,[,v])=>s+v, 0);
+  if (total === 0) { drawEmptyChart(ctx, canvas); return; }
+
+  const colors = { critical: '#f87171', high: '#fb923c', medium: '#fbbf24', low: '#34d399' };
+  const cx = canvas.offsetWidth / 2, cy = canvas.offsetHeight / 2;
+  const radius = Math.min(cx, cy) - 40;
+  let startAngle = -Math.PI / 2;
+
+  data.forEach(([label, value]) => {
+    if (value === 0) return;
+    const sliceAngle = (value / total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, startAngle, startAngle + sliceAngle);
+    ctx.closePath();
+    ctx.fillStyle = colors[label];
+    ctx.fill();
+
+    // Label
+    const midAngle = startAngle + sliceAngle / 2;
+    const lx = cx + (radius * 0.65) * Math.cos(midAngle);
+    const ly = cy + (radius * 0.65) * Math.sin(midAngle);
+    ctx.fillStyle = '#0a0e1a';
+    ctx.font = 'bold 13px Segoe UI';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`${label} (${value})`, lx, ly);
+
+    startAngle += sliceAngle;
+  });
+
+  // Center hole for donut
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius * 0.45, 0, Math.PI * 2);
+  ctx.fillStyle = '#0a0e1a';
+  ctx.fill();
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = 'bold 22px Segoe UI';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(total, cx, cy - 8);
+  ctx.font = '11px Segoe UI';
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillText('signals', cx, cy + 12);
+}
+
+function renderProjectChart() {
+  const canvas = document.getElementById('project-chart');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = canvas.offsetWidth * dpr;
+  canvas.height = canvas.offsetHeight * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+
+  const counts = {};
+  triageResults.forEach(r => counts[r.project] = (counts[r.project]||0)+1);
+  const data = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+  if (data.length === 0) { drawEmptyChart(ctx, canvas); return; }
+
+  const barColors = ['#4f8fff','#a78bfa','#00d4ff','#34d399','#fb923c','#f87171','#fbbf24'];
+  const padding = { top: 20, right: 30, bottom: 40, left: 120 };
+  const w = canvas.offsetWidth - padding.left - padding.right;
+  const h = canvas.offsetHeight - padding.top - padding.bottom;
+  const barHeight = Math.min(35, h / data.length - 8);
+  const max = Math.max(...data.map(d => d[1]));
+
+  data.forEach(([label, value], i) => {
+    const y = padding.top + i * (barHeight + 8);
+    const barW = (value / max) * w;
+    const color = barColors[i % barColors.length];
+
+    // Bar
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.roundRect(padding.left, y, barW, barHeight, 6);
+    ctx.fill();
+
+    // Label
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = '12px Segoe UI';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, padding.left - 10, y + barHeight / 2);
+
+    // Value
+    ctx.fillStyle = '#94a3b8';
+    ctx.textAlign = 'left';
+    ctx.fillText(value, padding.left + barW + 8, y + barHeight / 2);
+  });
+}
+
+function drawEmptyChart(ctx, canvas) {
+  ctx.fillStyle = '#64748b';
+  ctx.font = '14px Segoe UI';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('No data yet — add signals to visualize', canvas.offsetWidth / 2, canvas.offsetHeight / 2);
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Handle enter key in textarea
+document.getElementById('signal-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    addCustomSignal();
+  }
+});
+
+// Initial render
+renderAll();
+</script>
+</body>
+</html>
